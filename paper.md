@@ -46,6 +46,8 @@ Protocol: single stratified 60/20/20 split (train/validation/test, SEED=42) crea
 
 **Error analysis.** Correctness partition of the test set: both-right 3,452; RF-only-right 56 (all noise — CNN false alarms); CNN-only-right 21 (all pulsars — RF's lost discoveries); both-wrong 51 (24 pulsars + 27 noise). Every CNN pulsar-miss is also an RF miss; the CNN recovers 21 pulsars the RF loses and loses none it keeps. Both-missed pulsars sit near the population mean on all 8 features while found pulsars are extreme (profile kurtosis +2.9σ, skewness +2.6σ) — weak, atypical profiles; CNN-recovered pulsars show elevated DM features (dm_stdev +1.3σ), implicating the DM-confirmation pathway. Missed-pulsar median scores are 0.09–0.10 under both models: confidently wrong, so no threshold move recovers them.
 
+**Ablation (winning CNN, same protocol).** Profile-only inputs: ROC-AUC 0.9774, PR-AUC 0.9253. DM-only: ROC-AUC 0.8960, PR-AUC 0.3725 (early-stopped, 6 epochs). Full-8: 0.9818/0.9378. The profile carries the headline signal; DM features contribute the refinement (+0.004 ROC, +0.013 PR) — consistent with the DM-confirmation pathway in the error analysis.
+
 ## 5. Discussion
 
 Three honest gaps. First, our CNN trails Report6's CNN (0.984/0.993/0.975): their split and balancing are undescribed, ours are fixed and strict — we report the gap rather than tune it away. Second, calibration improves but does not reach the tree ensemble. Third, the headline-correct paper claim is the split verdict (CNN ranks marginally better, RF decides significantly better), not a victory narrative.

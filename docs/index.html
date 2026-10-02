@@ -62,7 +62,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <div><img src="assets/learning_curve.png" alt="Learning curve"><p>Learning curve (PR-AUC): still rising — more labels would help.</p></div>
 </div>
 <p><img class="full" src="assets/importance.png" alt="Permutation importance"></p>
-<p>Permutation importance: <code>profile_kurtosis</code> dominates — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics.</p>
+<p>Permutation importance: <code>profile_kurtosis</code> dominates — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics. Ablation on the winning CNN agrees: profile-only ROC 0.977 / PR 0.925, DM-only 0.896 / 0.373, full-8 0.982 / 0.938 — profile carries, DM refines.</p>
 </div>
 
 <div class="card">

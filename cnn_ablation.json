@@ -1,0 +1,42 @@
+{
+ "seed": 42,
+ "cfg": {
+  "blocks": 1,
+  "ch": 16,
+  "k": 2,
+  "pool": false,
+  "act": "relu"
+ },
+ "results": {
+  "profile-only": {
+   "roc": 0.9774,
+   "pr": 0.9253,
+   "brier": 0.0344,
+   "acc": 0.9656,
+   "posprec": 0.7676,
+   "posrec": 0.8963,
+   "val_prauc": 0.9222,
+   "epochs": 28.0
+  },
+  "DM-only": {
+   "roc": 0.896,
+   "pr": 0.3725,
+   "brier": 0.116,
+   "acc": 0.8587,
+   "posprec": 0.381,
+   "posrec": 0.8689,
+   "val_prauc": 0.3714,
+   "epochs": 6.0
+  },
+  "full-8": {
+   "roc": 0.9818,
+   "pr": 0.9378,
+   "brier": 0.0284,
+   "acc": 0.9701,
+   "posprec": 0.7855,
+   "posrec": 0.9268,
+   "val_prauc": 0.9325,
+   "epochs": 38.0
+  }
+ }
+}

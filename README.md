@@ -74,6 +74,8 @@ Correctness partition of the test set: both-right 3,452; RF-only-right 56 (**all
 
 `paper.md` (draft v0.1): abstract through limitations with the full measured table, the split verdict, the Report6 gap, and the boundary on image-based systems. Internal review only, not submitted anywhere.
 
+**Ablation (winning CNN, same protocol):** profile-only ROC 0.977 / PR 0.925; DM-only ROC 0.896 / PR 0.373; full-8 0.982 / 0.938. Profile carries the signal, DM refines it. (`cnn_ablation.py` → `cnn_ablation.json`)
+
 ## Citation
 
 - Dataset: Lyon, R. (2015). HTRU2 [Dataset]. UCI ML Repository. https://doi.org/10.24432/C5DK6R
