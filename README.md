@@ -13,6 +13,9 @@ Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D
 | `cnn_grid.py` / `cnn_grid_results.json` / `cnn_best.pt` | v2 compute step: 32-config grid, selection log, winning weights |
 | `pulsar_selection_v3.ipynb` | v3: temperature scaling + bootstrap CIs + McNemar |
 | `pulsar_selection_v3.executed.ipynb` | v3 executed copy |
+| `pulsar_selection_v4_errors.ipynb` | v4: disagreement + error analysis (discordant and jointly-missed pulsars, profiled by feature) |
+| `pulsar_selection_v4_errors.executed.ipynb` | v4 executed copy |
+| `paper.md` | Working paper draft (v0.1) built from the dossier — every number measured |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |
 | `docs/` | GitHub Pages progress site (served from `/docs`) |
@@ -64,6 +67,12 @@ Verdict: CNN wins ranking quality (ROC/PR-AUC) and recall, RF wins accuracy and 
 - Bootstrap 95% CIs (B=2000, paired) include 0 for both deltas: ΔROC +0.0058 [−0.0003, +0.0128], ΔPR +0.0051 [−0.0030, +0.0138]. Ranking lead suggestive, not significant.
 - McNemar exact p=0.0001 at 0.5 threshold — decisions differ significantly, **in RF's favour** (RF-only-right 56 vs CNN-only-right 21).
 - Paper claim, exactly: *CNN ranks marginally better, RF decides significantly better.* Anything stronger is unsupported.
+
+## v4 — error analysis + paper draft
+
+Correctness partition of the test set: both-right 3,452; RF-only-right 56 (**all noise** — CNN false alarms); CNN-only-right 21 (**all pulsars** — RF's lost discoveries); both-wrong 51 (24 pulsars + 27 noise). Every CNN pulsar-miss is also an RF miss; CNN recovers 21 RF loses, loses none RF keeps. Both-missed pulsars are feature-atypical (near population mean while found pulsars hit profile kurtosis +2.9σ); missed-pulsar median scores ~0.1 — confidently wrong, unrecoverable by threshold moves.
+
+`paper.md` (draft v0.1): abstract through limitations with the full measured table, the split verdict, the Report6 gap, and the boundary on image-based systems. Internal review only, not submitted anywhere.
 
 ## Citation
 

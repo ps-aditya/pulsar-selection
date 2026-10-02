@@ -28,10 +28,10 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <div class="wrap">
 
 <div class="hero">
-<span class="badge">v1.0 released</span><span class="badge">v2 CNN replication</span><span class="badge">v3 calibration + significance</span><span class="badge">SEED 42 · reproducible</span>
+<span class="badge">v1.0 released</span><span class="badge">v2 CNN replication</span><span class="badge">v3 calibration + significance</span><span class="badge">v4 error analysis + paper</span><span class="badge">SEED 42 · reproducible</span>
 <h1>Pulsar Candidate Selection (HTRU2)</h1>
 <p>Random Forest triage of pulsar candidates (v1) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment (v2) — dataset-only, no hardware. This page tracks what has actually been done, with verified numbers and honest misses.</p>
-<p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v3.ipynb">Notebook v3 (source)</a></p>
+<p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v3.ipynb">Notebook v3 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v4_errors.ipynb">Notebook v4 errors (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/paper.md">Paper draft</a></p>
 </div>
 
 <div class="card">
@@ -92,7 +92,17 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 
 <div class="card">
-<h2><span class="n">§5</span> Progress log</h2>
+<h2><span class="n">§5</span> v4 — error analysis + paper draft</h2>
+<p>Correctness partition: both-right 3,452 · RF-only-right 56 (<strong>all noise</strong> — CNN false alarms) · CNN-only-right 21 (<strong>all pulsars</strong> — RF's lost discoveries) · both-wrong 51 (24 pulsars + 27 noise). Every CNN pulsar-miss is also an RF miss; the CNN recovers 21 RF loses and loses none it keeps.</p>
+<p>Both-missed pulsars are feature-atypical (near population mean; found pulsars hit profile kurtosis +2.9σ); missed-pulsar median scores ~0.1 — confidently wrong, unrecoverable by threshold moves. <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/paper.md">Working paper draft (v0.1)</a> assembles the full dossier: abstract, method, measured tables, split verdict, Report6 gap, limitations.</p>
+<div class="grid">
+<div><img src="assets/error_profile.png" alt="Error group profiles"><p>Error-group deviation from population mean.</p></div>
+<div><img src="assets/missed_scores.png" alt="Missed pulsar scores"><p>Test-pulsar score distributions — misses sit far left of threshold.</p></div>
+</div>
+</div>
+
+<div class="card">
+<h2><span class="n">§6</span> Progress log</h2>
 <ol class="tl done">
 <li><strong>Scoped the project — #15 Pulsar Candidate Selection.</strong><br><span class="d">Dropped the hardware track (radiation forecaster) as a poor fit for a systems profile; chose the dataset-only HTRU2 benchmark. Decision recorded in the notebook header.</span></li>
 <li><strong>Topic review submitted (2 pages).</strong><br><span class="d">Overview, importance, aims, method, expected outcomes — the skeleton this work follows (§1–10).</span></li>
@@ -100,12 +110,13 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <li><strong>v1.0 released on GitHub.</strong><br><span class="d">Source + executed notebooks, pinned requirements, cached data, README with verified results including misses.</span></li>
 <li><strong>This progress site published.</strong><br><span class="d">Data card, method, results, and progress log online via GitHub Pages.</span></li>
 <li><strong>v2: CNN replication executed &amp; compared paper-style.</strong><br><span class="d">32-config 1D-CNN grid (SGD, val PR-AUC selection) on identical splits; CNN leads ROC/PR-AUC and recall, RF leads accuracy/calibration; Report6 gap documented.</span></li>
-<li><strong>v3: temperature scaling + paired significance.</strong><br><span class="d">You are here. T=0.718 narrows the Brier gap; bootstrap CIs include 0 (ranking lead not significant); McNemar p=0.0001 favours RF's 0.5-threshold decisions. Next: disagreement/error analysis, then the paper draft.</span></li>
+<li><strong>v3: temperature scaling + paired significance.</strong><br><span class="d">T=0.718 narrows the Brier gap; bootstrap CIs include 0 (ranking lead not significant); McNemar p=0.0001 favours RF's 0.5-threshold decisions.</span></li>
+<li><strong>v4: error analysis + paper draft.</strong><br><span class="d">You are here. Discordant/jointly-missed pulsars profiled by feature; working paper (v0.1) assembled from the dossier. Next: internal review pass on the paper, then viva prep.</span></li>
 </ol>
 </div>
 
 <div class="card">
-<h2><span class="n">§6</span> Reproduce it</h2>
+<h2><span class="n">§7</span> Reproduce it</h2>
 <p><code>pip install -r requirements.txt</code> (torch CPU: see note in requirements), then run either notebook top-to-bottom — data downloads automatically and every random step uses <code>SEED=42</code>. v2 compute: <code>python cnn_grid.py</code> (~10 min CPU) writes <code>cnn_grid_results.json</code> + <code>cnn_best.pt</code>, which the notebook reports. Site figures: <code>python docs/plots.py</code>; CNN figures are written by the v2 notebook itself.</p>
 <p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model.</p>
 </div>
