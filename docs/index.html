@@ -12,10 +12,12 @@
 .badge{display:inline-block;background:#1d2748;color:var(--acc);border:1px solid #2c3a6b;border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:8px}
 .card{background:var(--card);border:1px solid #232d55;border-radius:12px;padding:20px 22px;margin:20px 0}
 h2{margin-top:0;font-size:1.25rem}h2 .n{color:var(--acc)}
-table{border-collapse:collapse;width:100%;font-size:.92rem}th,td{border:1px solid #2a3560;padding:8px 10px;text-align:left}th{background:#1a2342}
+table{border-collapse:collapse;width:100%;font-size:.92rem;display:block;overflow-x:auto}th,td{border:1px solid #2a3560;padding:8px 10px;text-align:left;white-space:nowrap}th{background:#1a2342}td:last-child{white-space:normal;min-width:220px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
 .grid img{width:100%;border-radius:8px;border:1px solid #2a3560;background:#fff}
-img.full{width:100%;max-width:520px;border-radius:8px;border:1px solid #2a3560;background:#fff}
+.grid p{font-size:.85rem;color:var(--mut);margin:8px 0 0}
+img{height:auto}img.full{width:100%;max-width:560px;border-radius:8px;border:1px solid #2a3560;background:#fff}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}nav.toc a{font-size:.82rem;background:#1d2748;border:1px solid #2c3a6b;border-radius:999px;padding:2px 12px;text-decoration:none}nav.toc a:hover{background:#27346a}
 .ok{color:var(--ok)}.miss{color:var(--warn)}
 .tl{list-style:none;padding:0;margin:0}.tl li{position:relative;padding:0 0 18px 26px;border-left:2px solid #2c3a6b;margin-left:8px}
 .tl li::before{content:"";position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--acc)}
@@ -32,9 +34,10 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <h1>Pulsar Candidate Selection (HTRU2)</h1>
 <p>Random Forest triage of pulsar candidates (v1) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment (v2) — dataset-only, no hardware. This page tracks what has actually been done, with verified numbers and honest misses.</p>
 <p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v3.ipynb">Notebook v3 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v4_errors.ipynb">Notebook v4 errors (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/paper.md">Paper draft</a></p>
+<nav class="toc"><a href="#s1">§1 Data</a><a href="#s2">§2 Method</a><a href="#s3">§3 CNN</a><a href="#s4">§4 Calibration</a><a href="#s5">§5 Errors + paper</a><a href="#s6">§6 Progress</a><a href="#s7">§7 Reproduce</a></nav>
 </div>
 
-<div class="card">
+<div class="card" id="s1">
 <h2><span class="n">§1</span> Data card — provenance &amp; class balance</h2>
 <table>
 <tr><th>Field</th><th>Value</th></tr>
@@ -48,7 +51,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <p>Imbalance ≈ 9.9:1 — plain accuracy is worthless here (91% by predicting all-zero), so everything is reported as ROC-AUC / PR-AUC / recall at a cost-chosen threshold.</p>
 </div>
 
-<div class="card">
+<div class="card" id="s2">
 <h2><span class="n">§2</span> Method (locked)</h2>
 <p>Stratified 60/20/20 split <em>before</em> any weighting · logistic-regression baseline vs cross-validated Random Forest (PR-AUC-led grid) · Platt calibration on a dedicated validation fold · operating threshold from a written 10:1 miss-vs-false-alarm cost model, never default 0.5 · learning curve + permutation importance (never impurity importance).</p>
 <table>
@@ -65,7 +68,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <p>Permutation importance: <code>profile_kurtosis</code> dominates — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics. Ablation on the winning CNN agrees: profile-only ROC 0.977 / PR 0.925, DM-only 0.896 / 0.373, full-8 0.982 / 0.938 — profile carries, DM refines.</p>
 </div>
 
-<div class="card">
+<div class="card" id="s3">
 <h2><span class="n">§3</span> v2 — 1D-CNN replication (paper-style comparison)</h2>
 <p>Replicates the UCSD ECE228 Report6 setup on the <em>identical</em> v1 splits: 32-config grid over blocks × channels × kernel × pool × ReLU/tanh, SGD, val PR-AUC selection. Winner: 1 block, 16ch, k=2, no pool, ReLU. Image-based systems (MICNN/PICS) are out of scope — HTRU2 contains no plot pixels.</p>
 <table>
@@ -81,7 +84,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="s4">
 <h2><span class="n">§4</span> v3 — temperature scaling + paired significance</h2>
 <p>Single-parameter temperature scaling (T=0.718, fit on val NLL): test NLL 0.1228→0.1119, Brier 0.0284→0.0258 — gap to RF (0.0167) narrowed, not closed.</p>
 <p>Bootstrap 95% CIs (B=2000, paired) include 0 for both deltas: ΔROC +0.0058 [−0.0003, +0.0128], ΔPR +0.0051 [−0.0030, +0.0138]. McNemar exact p=0.0001 at the 0.5 threshold — decisions differ significantly, <span class="miss">in RF's favour</span> (56 vs 21 discordant). Verdict: <strong>CNN ranks marginally better, RF decides significantly better.</strong></p>
@@ -91,7 +94,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="s5">
 <h2><span class="n">§5</span> v4 — error analysis + paper draft</h2>
 <p>Correctness partition: both-right 3,452 · RF-only-right 56 (<strong>all noise</strong> — CNN false alarms) · CNN-only-right 21 (<strong>all pulsars</strong> — RF's lost discoveries) · both-wrong 51 (24 pulsars + 27 noise). Every CNN pulsar-miss is also an RF miss; the CNN recovers 21 RF loses and loses none it keeps.</p>
 <p>Both-missed pulsars are feature-atypical (near population mean; found pulsars hit profile kurtosis +2.9σ); missed-pulsar median scores ~0.1 — confidently wrong, unrecoverable by threshold moves. <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/paper.md">Working paper draft (v0.1)</a> assembles the full dossier: abstract, method, measured tables, split verdict, Report6 gap, limitations.</p>
@@ -101,7 +104,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 </div>
 
-<div class="card">
+<div class="card" id="s6">
 <h2><span class="n">§6</span> Progress log</h2>
 <ol class="tl done">
 <li><strong>Scoped the project — #15 Pulsar Candidate Selection.</strong><br><span class="d">Dropped the hardware track (radiation forecaster) as a poor fit for a systems profile; chose the dataset-only HTRU2 benchmark. Decision recorded in the notebook header.</span></li>
@@ -115,9 +118,10 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </ol>
 </div>
 
-<div class="card">
+<div class="card" id="s7">
 <h2><span class="n">§7</span> Reproduce it</h2>
-<p><code>pip install -r requirements.txt</code> (torch CPU: see note in requirements), then run either notebook top-to-bottom — data downloads automatically and every random step uses <code>SEED=42</code>. v2 compute: <code>python cnn_grid.py</code> (~10 min CPU) writes <code>cnn_grid_results.json</code> + <code>cnn_best.pt</code>, which the notebook reports. Site figures: <code>python docs/plots.py</code>; CNN figures are written by the v2 notebook itself.</p>
+<p><code>pip install -r requirements.txt</code> (torch CPU: see note in requirements), then run any notebook top-to-bottom — data downloads automatically and every random step uses <code>SEED=42</code>. v2 compute: <code>python cnn_grid.py</code> (~10 min CPU) writes <code>cnn_grid_results.json</code> + <code>cnn_best.pt</code>, which the notebook reports.</p>
+<p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model. Site figures regenerate deterministically via <code>python docs/plots_all.py</code> (SEED=42).</p>
 <p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model.</p>
 </div>
 
