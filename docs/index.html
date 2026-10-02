@@ -28,10 +28,10 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <div class="wrap">
 
 <div class="hero">
-<span class="badge">v1.0 released</span><span class="badge">v2 CNN replication</span><span class="badge">SEED 42 · reproducible</span>
+<span class="badge">v1.0 released</span><span class="badge">v2 CNN replication</span><span class="badge">v3 calibration + significance</span><span class="badge">SEED 42 · reproducible</span>
 <h1>Pulsar Candidate Selection (HTRU2)</h1>
 <p>Random Forest triage of pulsar candidates (v1) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment (v2) — dataset-only, no hardware. This page tracks what has actually been done, with verified numbers and honest misses.</p>
-<p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a></p>
+<p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v3.ipynb">Notebook v3 (source)</a></p>
 </div>
 
 <div class="card">
@@ -82,19 +82,30 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 
 <div class="card">
-<h2><span class="n">§4</span> Progress log</h2>
+<h2><span class="n">§4</span> v3 — temperature scaling + paired significance</h2>
+<p>Single-parameter temperature scaling (T=0.718, fit on val NLL): test NLL 0.1228→0.1119, Brier 0.0284→0.0258 — gap to RF (0.0167) narrowed, not closed.</p>
+<p>Bootstrap 95% CIs (B=2000, paired) include 0 for both deltas: ΔROC +0.0058 [−0.0003, +0.0128], ΔPR +0.0051 [−0.0030, +0.0138]. McNemar exact p=0.0001 at the 0.5 threshold — decisions differ significantly, <span class="miss">in RF's favour</span> (56 vs 21 discordant). Verdict: <strong>CNN ranks marginally better, RF decides significantly better.</strong></p>
+<div class="grid">
+<div><img src="assets/cnn_temp.png" alt="Temperature scaling effect"><p>Temperature scaling effect (test reliability).</p></div>
+<div><img src="assets/delta_ci.png" alt="Delta CIs"><p>CNN−RF deltas with 95% bootstrap CIs — both cross zero.</p></div>
+</div>
+</div>
+
+<div class="card">
+<h2><span class="n">§5</span> Progress log</h2>
 <ol class="tl done">
 <li><strong>Scoped the project — #15 Pulsar Candidate Selection.</strong><br><span class="d">Dropped the hardware track (radiation forecaster) as a poor fit for a systems profile; chose the dataset-only HTRU2 benchmark. Decision recorded in the notebook header.</span></li>
 <li><strong>Topic review submitted (2 pages).</strong><br><span class="d">Overview, importance, aims, method, expected outcomes — the skeleton this work follows (§1–10).</span></li>
 <li><strong>Reproducible notebook built &amp; executed end-to-end.</strong><br><span class="d">Data cards, EDA, stratified split, baseline vs tuned RF, calibration + cost threshold, learning curve + permutation importance. Zero error cells.</span></li>
 <li><strong>v1.0 released on GitHub.</strong><br><span class="d">Source + executed notebooks, pinned requirements, cached data, README with verified results including misses.</span></li>
 <li><strong>This progress site published.</strong><br><span class="d">Data card, method, results, and progress log online via GitHub Pages.</span></li>
-<li><strong>v2: CNN replication executed &amp; compared paper-style.</strong><br><span class="d">You are here. 32-config 1D-CNN grid (SGD, val PR-AUC selection) on identical splits; CNN leads ROC/PR-AUC and recall, RF leads accuracy/calibration; Report6 gap documented. Next: temperature scaling for the CNN, then viva prep.</span></li>
+<li><strong>v2: CNN replication executed &amp; compared paper-style.</strong><br><span class="d">32-config 1D-CNN grid (SGD, val PR-AUC selection) on identical splits; CNN leads ROC/PR-AUC and recall, RF leads accuracy/calibration; Report6 gap documented.</span></li>
+<li><strong>v3: temperature scaling + paired significance.</strong><br><span class="d">You are here. T=0.718 narrows the Brier gap; bootstrap CIs include 0 (ranking lead not significant); McNemar p=0.0001 favours RF's 0.5-threshold decisions. Next: disagreement/error analysis, then the paper draft.</span></li>
 </ol>
 </div>
 
 <div class="card">
-<h2><span class="n">§5</span> Reproduce it</h2>
+<h2><span class="n">§6</span> Reproduce it</h2>
 <p><code>pip install -r requirements.txt</code> (torch CPU: see note in requirements), then run either notebook top-to-bottom — data downloads automatically and every random step uses <code>SEED=42</code>. v2 compute: <code>python cnn_grid.py</code> (~10 min CPU) writes <code>cnn_grid_results.json</code> + <code>cnn_best.pt</code>, which the notebook reports. Site figures: <code>python docs/plots.py</code>; CNN figures are written by the v2 notebook itself.</p>
 <p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model.</p>
 </div>

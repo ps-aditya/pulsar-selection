@@ -11,6 +11,8 @@ Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D
 | `pulsar_selection_cnn.ipynb` | v2 CNN replication notebook (replicates UCSD ECE228 Report6 setup) |
 | `pulsar_selection_cnn.executed.ipynb` | v2 executed copy |
 | `cnn_grid.py` / `cnn_grid_results.json` / `cnn_best.pt` | v2 compute step: 32-config grid, selection log, winning weights |
+| `pulsar_selection_v3.ipynb` | v3: temperature scaling + bootstrap CIs + McNemar |
+| `pulsar_selection_v3.executed.ipynb` | v3 executed copy |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |
 | `docs/` | GitHub Pages progress site (served from `/docs`) |
@@ -55,6 +57,13 @@ Honest misses: joint target (recall ≥ 0.90 at precision ≥ 0.90) not met on t
 | Literature, quoted: Lyon 2016 GH-VFDT 0.978/0.899/0.829; Report6 CNN 0.984/0.993/0.975 |
 
 Verdict: CNN wins ranking quality (ROC/PR-AUC) and recall, RF wins accuracy and calibration (Brier 0.0167 vs CNN 0.0284, uncalibrated). Our CNN does not reach Report6's numbers — gap documented in the notebook (their split/balancing unspecified; ours fixed and stricter). Temperature scaling is the named next step. Image-based systems (MICNN/PICS) are out of scope: HTRU2 has no plot pixels.
+
+## v3 — temperature scaling + paired significance
+
+- Temperature T=0.718 (val NLL fit): test NLL 0.1228→0.1119, Brier 0.0284→0.0258. Gap to RF (0.0167) narrowed, not closed.
+- Bootstrap 95% CIs (B=2000, paired) include 0 for both deltas: ΔROC +0.0058 [−0.0003, +0.0128], ΔPR +0.0051 [−0.0030, +0.0138]. Ranking lead suggestive, not significant.
+- McNemar exact p=0.0001 at 0.5 threshold — decisions differ significantly, **in RF's favour** (RF-only-right 56 vs CNN-only-right 21).
+- Paper claim, exactly: *CNN ranks marginally better, RF decides significantly better.* Anything stronger is unsupported.
 
 ## Citation
 
