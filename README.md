@@ -15,6 +15,8 @@ Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D
 | `pulsar_selection_v3.executed.ipynb` | v3 executed copy |
 | `pulsar_selection_v4_errors.ipynb` | v4: disagreement + error analysis (discordant and jointly-missed pulsars, profiled by feature) |
 | `pulsar_selection_v4_errors.executed.ipynb` | v4 executed copy |
+| `from_scratch/` | Ground-up NumPy reimplementations: `logreg.py`, `trees.py`, `mlp.py`, `cnn1d.py` (~350 lines, no libraries inside the models) |
+| `pulsar_selection_groundup.ipynb` (+ executed) | Side-by-side twin comparison: logreg ROC exact, tree 99.16% agreement, MLP gradcheck 2.5e-08, CNN gradcheck 6.6e-10, all metrics within band |
 | `paper.md` | Working paper draft (v0.1) built from the dossier — every number measured |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |
