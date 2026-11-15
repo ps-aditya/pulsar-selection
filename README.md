@@ -6,7 +6,7 @@ Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D
 
 | File | Purpose |
 |---|---|
-| `pulsar_selection.ipynb` | v1 source notebook — run top-to-bottom (§1–10) |
+| `pulsar_selection.ipynb` | v1 source notebook — run top-to-bottom (§1–11): leakage audit, single final test evaluation |
 | `pulsar_selection.executed.ipynb` | v1 executed copy with outputs and figures |
 | `pulsar_selection_cnn.ipynb` | v2 CNN replication notebook (replicates UCSD ECE228 Report6 setup) |
 | `pulsar_selection_cnn.executed.ipynb` | v2 executed copy |
@@ -46,9 +46,9 @@ Fixed `SEED=42` throughout. Split is stratified 60/20/20, created *before* any c
 | Model | Test ROC-AUC | Test PR-AUC | Precision / Recall @ T=0.10 |
 |---|---|---|---|
 | Logistic regression (baseline) | 0.977 | 0.934 | — |
-| Random Forest, calibrated (400 trees, depth 20) | 0.976 | 0.933 | 0.867 / 0.896 |
+| Random Forest (400 trees, depth 20), calibration selected by CV Brier | 0.9777 | 0.9332 | 0.9183 / 0.8567 @ T=0.54 |
 
-Honest misses: joint target (recall ≥ 0.90 at precision ≥ 0.90) not met on this split (best: 0.884); calibration improved val Brier but test Brier flat. Top permutation feature: `profile_kurtosis`. See notebook §10.
+Honest reporting: ROC-AUC ≥0.97 is met. The joint recall ≥0.90 at precision ≥0.90 target is not met at the cost-minimising threshold (recall 0.857). Calibration comparison on train+val selected **no calibration** (raw RF had the lowest cross-fitted CV Brier, 0.01721); sigmoid/isotonic did not improve out-of-sample Brier. ECE on test: 0.0099. Top permutation feature: `profile_kurtosis`. Test predictions, metrics, and persisted model hashes are written to `results/` during the single final evaluation (§10). See notebook §12.
 
 ## v2 — 1D-CNN replication (torch 2.14.1 CPU, identical splits)
 
