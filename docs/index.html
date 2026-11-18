@@ -31,8 +31,8 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 
 <div class="hero">
 <span class="badge">v1.0 released</span><span class="badge">v2 CNN replication</span><span class="badge">v3 calibration + significance</span><span class="badge">v4 error analysis + paper</span><span class="badge">ground-up rebuild</span><span class="badge">SEED 42 · reproducible</span>
-<h1>Pulsar Candidate Selection (HTRU2)</h1>
-<p>Random Forest triage of pulsar candidates (v1) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment (v2) — dataset-only, no hardware. This page tracks what has actually been done, with verified numbers and honest misses.</p>
+<h1>Pulsar Candidate Selection (HTRU2) — Project 7</h1>
+<p>Classical machine-learning mainline (leakage-audited RF, calibration study, cost-model thresholding, single test evaluation) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment as a supplementary track — dataset-only, no hardware. This page tracks what has actually been done, with verified numbers and honest misses.</p>
 <p><a href="https://github.com/ps-aditya/pulsar-selection">Repository</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection.ipynb">Notebook v1 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_cnn.ipynb">Notebook v2 CNN (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v3.ipynb">Notebook v3 (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/pulsar_selection_v4_errors.ipynb">Notebook v4 errors (source)</a> · <a href="https://github.com/ps-aditya/pulsar-selection/blob/main/paper.md">Paper draft</a></p>
 <nav class="toc"><a href="#s1">§1 Data</a><a href="#s2">§2 Method</a><a href="#s3">§3 CNN</a><a href="#s4">§4 Calibration</a><a href="#s5">§5 Errors + paper</a><a href="#s6">§6 Ground-up</a><a href="#s7">§7 Progress</a><a href="#s8">§8 Reproduce</a></nav>
 </div>
@@ -52,20 +52,21 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 </div>
 
 <div class="card" id="s2">
-<h2><span class="n">§2</span> Method (locked)</h2>
-<p>Stratified 60/20/20 split <em>before</em> any weighting · logistic-regression baseline vs cross-validated Random Forest (PR-AUC-led grid) · Platt calibration on a dedicated validation fold · operating threshold from a written 10:1 miss-vs-false-alarm cost model, never default 0.5 · learning curve + permutation importance (never impurity importance).</p>
+<h2><span class="n">§2</span> Method — classical mainline (leakage-audited, single test evaluation)</h2>
+<p>Stratified 60/20/20 split <em>before</em> any weighting · code-printed leakage audit (0 duplicates overall and across splits; index sets pairwise disjoint; scaler fitted on train only via a Pipeline; calibration fold disjoint) · logistic-regression baseline vs cross-validated Random Forest (PR-AUC-led grid) · four-way calibration study — none / sigmoid / isotonic / 5-fold cross-fitted sigmoid — selected by repeated CV Brier (5×2) on train+val only · operating threshold from a written 10:1 cost model with plotted expected-cost curve and 5:1/10:1/20:1 sensitivity · test set evaluated <strong>exactly once</strong>.</p>
 <table>
-<tr><th>Model</th><th>Test ROC-AUC</th><th>Test PR-AUC</th><th>Prec / Recall @ T=0.10</th></tr>
-<tr><td>LogReg baseline</td><td>0.977</td><td>0.934</td><td>—</td></tr>
-<tr><td>RF calibrated (400 trees, depth 20)</td><td><span class="ok">0.976 ✓</span> (target ≥ 0.97)</td><td>0.933</td><td>0.867 / 0.896</td></tr>
+<tr><th>Model</th><th>Validation ROC-AUC</th><th>Validation PR-AUC</th><th>Calibration (CV Brier, train+val)</th></tr>
+<tr><td>LogReg baseline</td><td>0.9744</td><td>0.9230</td><td>—</td></tr>
+<tr><td>RF tuned (400 trees, depth 20)</td><td>0.9721</td><td>0.9240</td><td>none 0.01721 · sigmoid 0.01721 · isotonic 0.01733 · cross 0.01723 → <strong>none selected</strong></td></tr>
 </table>
-<p class="miss">Honest miss: the joint target (recall ≥ 0.90 at precision ≥ 0.90) was not met — best recall at precision ≥ 0.90 is 0.884. Calibration improved validation Brier (0.0169→0.0161) but test Brier stayed flat (0.0167→0.0171). Reported as-is.</p>
+<p><strong>Final test evaluation (single pass, SEED=42):</strong> ROC-AUC <span class="ok">0.9777 ✓</span> (target ≥ 0.97; 95% CI 0.9671–0.9872) · PR-AUC 0.9332 (0.9117–0.9542) · precision @ T=0.54 <strong>0.9183</strong> · recall <strong>0.8567</strong> (CIs: precision 0.8889–0.9461, recall 0.8201–0.8933) · Brier 0.0166 · ECE 0.0099 · confusion TN 3227 / FP 25 / FN 47 / TP 281. Threshold T=0.54 chosen by the 10:1 cost model on train+val (FN=0 at 42 false alarms on the selection set); all of 5:1/10:1/20:1 select the same threshold.</p>
+<p class="miss">Honest misses: the joint target (recall ≥ 0.90 at precision ≥ 0.90) is not met at the cost-minimising threshold (recall 0.8567). Calibration improved nothing out of sample — the class-weighted raw forest is already near-calibrated (ECE 0.0099) and isotonic would collapse the ranking; "no calibration" is the measured, reported answer. Predictions, metrics and model hashes persisted in <code>results/</code>.</p>
 <div class="grid">
 <div><img src="assets/reliability.png" alt="Reliability diagram"><p>Reliability diagram (test): calibrated vs raw RF.</p></div>
 <div><img src="assets/learning_curve.png" alt="Learning curve"><p>Learning curve (PR-AUC): still rising — more labels would help.</p></div>
 </div>
 <p><img class="full" src="assets/importance.png" alt="Permutation importance"></p>
-<p>Permutation importance: <code>profile_kurtosis</code> dominates — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics. Ablation on the winning CNN agrees: profile-only ROC 0.977 / PR 0.925, DM-only 0.896 / 0.373, full-8 0.982 / 0.938 — profile carries, DM refines.</p>
+<p>Permutation importance (validation set): <code>profile_kurtosis</code> dominates (PR-AUC drop 0.633) — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics. Ablation on the winning CNN agrees: profile-only ROC 0.977 / PR 0.925, DM-only 0.896 / 0.373, full-8 0.982 / 0.938 — profile carries, DM refines.</p>
 </div>
 
 <div class="card" id="s3">
@@ -128,7 +129,9 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <li><strong>v2: CNN replication executed &amp; compared paper-style.</strong><br><span class="d">32-config 1D-CNN grid (SGD, val PR-AUC selection) on identical splits; CNN leads ROC/PR-AUC and recall, RF leads accuracy/calibration; Report6 gap documented.</span></li>
 <li><strong>v3: temperature scaling + paired significance.</strong><br><span class="d">T=0.718 narrows the Brier gap; bootstrap CIs include 0 (ranking lead not significant); McNemar p=0.0001 favours RF's 0.5-threshold decisions.</span></li>
 <li><strong>v4: error analysis + paper draft.</strong><br><span class="d">Discordant/jointly-missed pulsars profiled by feature; working paper (v0.1) assembled from the dossier.</span></li>
-<li><strong>Ground-up rebuild.</strong><br><span class="d">You are here. LogReg, tree, forest, MLP and 1D-CNN reimplemented in ~350 lines of NumPy and verified twin-by-twin. Next: viva prep.</span></li>
+<li><strong>Ground-up rebuild.</strong><br><span class="d">LogReg, tree, forest, MLP and 1D-CNN reimplemented in ~350 lines of NumPy and verified twin-by-twin (tag v3.0).</span></li>
+<li><strong>Classical mainline hardened (you are here).</strong><br><span class="d">Leakage audit added after the split; calibration study (none/sigmoid/isotonic/cross-fitted) selected by repeated CV Brier → "none" wins; expected-cost curve with marked T; single final test evaluation with paired bootstrap CIs + ECE; predictions and model hashes persisted in <code>results/</code>.</span></li>
+<li><strong>Report refreshed.</strong><br><span class="d"><code>paper.md</code> rewritten around the classical pipeline with the new measured numbers; README records data release version, download date and acknowledgement text.</span></li>
 </ol>
 </div>
 
@@ -136,10 +139,9 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <h2><span class="n">§8</span> Reproduce it</h2>
 <p><code>pip install -r requirements.txt</code> (torch CPU: see note in requirements), then run any notebook top-to-bottom — data downloads automatically and every random step uses <code>SEED=42</code>. v2 compute: <code>python cnn_grid.py</code> (~10 min CPU) writes <code>cnn_grid_results.json</code> + <code>cnn_best.pt</code>, which the notebook reports.</p>
 <p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model. Site figures regenerate deterministically via <code>python docs/plots_all.py</code> (SEED=42).</p>
-<p>Limitations, stated plainly: reproduces survey expert-vetting on one labelled dataset; discovers no new pulsars; threshold depends on the stated cost model.</p>
 </div>
 
-<footer>HTRU2: Lyon, R. (2015), UCI ML Repository, doi:10.24432/C5DK6R · Lyon et al., MNRAS 2016 · Raw data: HTRU collaboration, Parkes Observatory (CSIRO).</footer>
+<footer>HTRU2: Lyon, R. (2015), UCI ML Repository, doi:10.24432/C5DK6R · Lyon et al., MNRAS 2016 · Raw data: HTRU collaboration, Parkes Observatory (CSIRO); survey funded by UK EPSRC grant EP/I028099/1.</footer>
 </div>
 </body>
 </html>

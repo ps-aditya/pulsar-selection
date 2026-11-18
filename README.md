@@ -1,6 +1,6 @@
-# Pulsar Candidate Selection (HTRU2) — v1 + v2 CNN replication
+# Pulsar Candidate Selection (HTRU2) — Project 7
 
-Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D-CNN replication of the published CNN-on-HTRU2 experiment (v2), with data cards for HTRU2's provenance, class balance, and requested citation. Dataset-only project — no hardware.
+Classical machine-learning mainline: leakage-audited split, CV-tuned Random Forest, four-way calibration study selected by CV Brier, cost-model thresholding, single final test evaluation with bootstrap CIs and ECE. Supplementary tracks retained in the repo: 1D-CNN replication (v2), temperature scaling + significance (v3), error analysis (v4), ground-up NumPy reimplementations. Dataset-only — no hardware.
 
 ## Contents
 
@@ -17,7 +17,8 @@ Reproducible notebooks: Random Forest triage of pulsar candidates (v1) plus a 1D
 | `pulsar_selection_v4_errors.executed.ipynb` | v4 executed copy |
 | `from_scratch/` | Ground-up NumPy reimplementations: `logreg.py`, `trees.py`, `mlp.py`, `cnn1d.py` (~350 lines, no libraries inside the models) |
 | `pulsar_selection_groundup.ipynb` (+ executed) | Side-by-side twin comparison: logreg ROC exact, tree 99.16% agreement, MLP gradcheck 2.5e-08, CNN gradcheck 6.6e-10, all metrics within band |
-| `paper.md` | Working paper draft (v0.1) built from the dossier — every number measured |
+| `paper.md` | Project 7 report (v1.0): classical mainline with calibrated results + supplementary-tracks appendix |
+| `VIVA_PREP.md` | Viva Q&A: split strategy, metric choice, calibration study, cost model — each answer tied to a repo artifact |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |
 | `docs/` | GitHub Pages progress site (served from `/docs`) |
@@ -38,8 +39,11 @@ Fixed `SEED=42` throughout. Split is stratified 60/20/20, created *before* any c
 ## Data (summary — full card in notebook §1–2)
 
 - Source: HTRU-South survey via Parkes Observatory; donor R. J. Lyon (Univ. of Manchester); UCI ML Repository id 372, CC-BY 4.0.
+- **Data release / catalogue version:** UCI ML Repository id 372 (donated 13 Feb 2017); figshare mirror DOI `10.6084/m9.figshare.3080389.v1`.
+- **Download date:** cached copy (`data/HTRU_2.csv`) committed to this repository on **2026-09-25**; the notebook re-downloads it automatically if missing.
+- **Required acknowledgement text:** raw data acquired by the HTRU collaboration with the Parkes radio telescope, part of the Australia Telescope National Facility, operated by CSIRO; survey funded by UK EPSRC grant EP/I028099/1. Citation (both): Lyon, R. (2015). *HTRU2* [Dataset]. UCI ML Repository. https://doi.org/10.24432/C5DK6R · Lyon et al., MNRAS 459(1), 2016.
 - 17,898 candidates = **1,639 pulsars (9.16%)** + 16,259 non-pulsars. 8 continuous features (profile + DM–SNR statistics), no sky position.
-- Metrics are ROC-AUC / PR-AUC / recall@cost-threshold — never accuracy-first (91% is achievable by predicting all-zero).
+- Metrics are ROC-AUC / PR-AUC / precision-recall at the cost-chosen threshold / Brier / ECE — never accuracy-first (91% is achievable by predicting all-zero).
 
 ## Verified results (SEED=42, sklearn 1.9.1)
 
@@ -74,7 +78,7 @@ Verdict: CNN wins ranking quality (ROC/PR-AUC) and recall, RF wins accuracy and 
 
 Correctness partition of the test set: both-right 3,452; RF-only-right 56 (**all noise** — CNN false alarms); CNN-only-right 21 (**all pulsars** — RF's lost discoveries); both-wrong 51 (24 pulsars + 27 noise). Every CNN pulsar-miss is also an RF miss; CNN recovers 21 RF loses, loses none RF keeps. Both-missed pulsars are feature-atypical (near population mean while found pulsars hit profile kurtosis +2.9σ); missed-pulsar median scores ~0.1 — confidently wrong, unrecoverable by threshold moves.
 
-`paper.md` (draft v0.1): abstract through limitations with the full measured table, the split verdict, the Report6 gap, and the boundary on image-based systems. Internal review only, not submitted anywhere.
+`paper.md` (report v1.0): the classical mainline (leakage audit, calibration study, cost-model thresholding, single test evaluation with CIs + ECE) with an appendix retaining the CNN replication, temperature scaling, error analysis, and ground-up rebuild as supplementary tracks.
 
 **Ablation (winning CNN, same protocol):** profile-only ROC 0.977 / PR 0.925; DM-only ROC 0.896 / PR 0.373; full-8 0.982 / 0.938. Profile carries the signal, DM refines it. (`cnn_ablation.py` → `cnn_ablation.json`)
 
