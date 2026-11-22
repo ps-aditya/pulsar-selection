@@ -1,5 +1,8 @@
 """Regenerate ALL docs/assets figures with polished, non-overlapping layout.
-Deterministic SEED=42. Run: python docs/plots_all.py
+Deterministic SEED=42. §2 figures are on the new-protocol basis (train+val selection,
+single test evaluation); v2/v3/v4 supplementary figures reproduce the v1-era RF on
+purpose so they stay consistent with those notebooks.
+Run: python docs/plots_all.py
 """
 from pathlib import Path
 import urllib.request, zipfile, io
@@ -8,7 +11,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from sklearn.model_selection import train_test_split, StratifiedKFold, learning_curve
+from sklearn.model_selection import train_test_split, StratifiedKFold, RepeatedStratifiedKFold, learning_curve
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
@@ -87,6 +90,31 @@ p_cnn = torch.softmax(torch.tensor(z_te), 1)[:, 1].numpy()
 p_cnnT = torch.softmax(torch.tensor(z_te) / T, 1)[:, 1].numpy()
 print(f"T={T:.3f}")
 
+# ---- new-protocol final model (classical mainline, report v1.0) ----
+X_tv = np.vstack([X_tr, X_va]); y_tv = np.hstack([y_tr, y_va])
+rf_final = RandomForestClassifier(n_estimators=400, max_depth=20, min_samples_leaf=2,
+    class_weight="balanced_subsample", random_state=SEED, n_jobs=-1).fit(X_tv, y_tv)
+
+def cross_fitted_probs(base, X, y, method, n_splits):
+    cv_in = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    p = np.zeros(len(y))
+    for i_tr, i_va in cv_in.split(X, y):
+        c = CalibratedClassifierCV(estimator=FrozenEstimator(base), method=method).fit(X[i_tr], y[i_tr])
+        p[i_va] = c.predict_proba(X[i_va])[:, 1]
+    return p
+
+cv_outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=SEED)
+cvb = {"none": [], "sigmoid": [], "isotonic": [], "cross": []}
+for tr_i, va_i in cv_outer.split(X_tv, y_tv):
+    b = RandomForestClassifier(n_estimators=400, max_depth=20, min_samples_leaf=2,
+        class_weight="balanced_subsample", random_state=SEED, n_jobs=-1).fit(X_tv[tr_i], y_tv[tr_i])
+    Xf, yf = X_tv[va_i], y_tv[va_i]
+    cvb["none"].append(brier_score_loss(yf, b.predict_proba(Xf)[:, 1]))
+    cvb["sigmoid"].append(brier_score_loss(yf, cross_fitted_probs(b, Xf, yf, "sigmoid", 3)))
+    cvb["isotonic"].append(brier_score_loss(yf, cross_fitted_probs(b, Xf, yf, "isotonic", 3)))
+    cvb["cross"].append(brier_score_loss(yf, cross_fitted_probs(b, Xf, yf, "sigmoid", 5)))
+print("CV Brier:", {k: round(float(np.mean(v)), 5) for k, v in cvb.items()})
+
 # ---- 1. balance ----
 bal = df["target"].value_counts().sort_index()
 fig, ax = plt.subplots(figsize=(5.2, 3.6))
@@ -100,15 +128,23 @@ for b, v in zip(bars, [bal[0], bal[1]]):
             ha="center", va="bottom", fontsize=10)
 fig.savefig(A / "balance.png", bbox_inches="tight"); plt.close(fig)
 
-# ---- 2. reliability (RF) ----
-fig, ax = plt.subplots(figsize=(5.4, 4.4))
-ax.plot([0, 1], [0, 1], ls="--", color="gray", label="ideal")
-for name, p, c in [("rf", p_rf, "#f59e0b"), ("rf + calibrated", p_rf_cal, "#16a34a")]:
-    ft, mp = calibration_curve(y_te, p, n_bins=10, strategy="quantile")
-    ax.plot(mp, ft, marker="o", ms=5, label=name, color=c)
-ax.set_title("Reliability diagram — Random Forest (test)")
-ax.set_xlabel("mean predicted probability"); ax.set_ylabel("fraction positive")
-ax.legend(loc="lower right", fontsize=9); ax.set_aspect("equal", adjustable="box")
+# ---- 2. calibration study (train+val basis): reliability + CV Brier by method ----
+fig, ax = plt.subplots(1, 2, figsize=(11.2, 4.3))
+ax[0].plot([0, 1], [0, 1], ls="--", color="gray", label="ideal")
+ft, mp = calibration_curve(y_tv, rf_final.predict_proba(X_tv)[:, 1], n_bins=10, strategy="quantile")
+ax[0].plot(mp, ft, marker="o", ms=5, color="#f59e0b", label="raw RF (final model)")
+ax[0].set_title("Reliability — final RF (train+val)")
+ax[0].set_xlabel("mean predicted probability"); ax[0].set_ylabel("fraction positive")
+ax[0].legend(loc="lower right", fontsize=9); ax[0].set_aspect("equal", adjustable="box")
+means = [np.mean(cvb[m]) for m in ["none", "sigmoid", "isotonic", "cross"]]
+stds = [np.std(cvb[m]) for m in ["none", "sigmoid", "isotonic", "cross"]]
+bars = ax[1].bar(["none", "sigmoid", "isotonic", "cross"], means, yerr=stds, capsize=4,
+                 color=["#16a34a", "#94a3b8", "#94a3b8", "#94a3b8"], ecolor="black")
+ax[1].set_ylim(min(means) - 0.002, max(means) + 0.002)
+for b, v in zip(bars, means):
+    ax[1].text(b.get_x() + b.get_width() / 2, v + stds[0] * 0.9, f"{v:.5f}", ha="center", fontsize=9)
+ax[1].set_title("Mean CV Brier by method (5×2, cross-fitted) — lower is better")
+ax[1].set_ylabel("mean CV Brier")
 fig.savefig(A / "reliability.png", bbox_inches="tight"); plt.close(fig)
 
 # ---- 3. learning curve ----
@@ -127,8 +163,8 @@ ax.xaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter("{x:,.0f}"))
 ax.legend(fontsize=9)
 fig.savefig(A / "learning_curve.png", bbox_inches="tight"); plt.close(fig)
 
-# ---- 4. permutation importance ----
-pi = permutation_importance(cal, X_te, y_te, n_repeats=10, random_state=SEED,
+# ---- 4. permutation importance (validation set, final model) ----
+pi = permutation_importance(rf_final, X_va, y_va, n_repeats=10, random_state=SEED,
                             n_jobs=-1, scoring="average_precision")
 order = np.argsort(pi.importances_mean)[::-1]
 fig, ax = plt.subplots(figsize=(6.2, 4.2))
@@ -137,12 +173,36 @@ ax.barh(yy, pi.importances_mean[order], xerr=pi.importances_std[order],
         color="#3b82f6", ecolor="black", capsize=3)
 ax.set_yticks(yy); ax.set_yticklabels([feats[i] for i in order])
 ax.invert_yaxis()
-ax.set_title("Permutation importance — test PR-AUC drop")
+ax.set_title("Permutation importance — validation PR-AUC drop (final model)")
 ax.set_xlabel("mean PR-AUC drop (10 repeats)")
 for j, i in enumerate(order):
     ax.text(pi.importances_mean[i] + pi.importances_std[i] + 0.008, j,
             f"{pi.importances_mean[i]:.3f}", va="center", fontsize=9)
 fig.savefig(A / "importance.png", bbox_inches="tight"); plt.close(fig)
+
+# ---- 4b. expected-cost curve (train+val, all three ratios, chosen T marked) ----
+p_tv_final = rf_final.predict_proba(X_tv)[:, 1]
+ths = np.linspace(0.05, 0.95, 91)
+fig, ax = plt.subplots(figsize=(6.6, 4.2))
+costs10, T_final = None, None
+for ratio, col in [(5, "#94a3b8"), (10, "#3b82f6"), (20, "#7c3aed")]:
+    costs = [ratio * ((p_tv_final < t) & (y_tv == 1)).sum() + ((p_tv_final >= t) & (y_tv == 0)).sum()
+             for t in ths]
+    ax.plot(ths, costs, color=col, label=f"cost ratio {ratio}:1")
+    if ratio == 10:
+        costs10, T_final = costs, float(ths[int(np.argmin(costs))])
+for ratio in (5, 20):
+    assert abs(float(ths[int(np.argmin([ratio * ((p_tv_final < t) & (y_tv == 1)).sum()
+              + ((p_tv_final >= t) & (y_tv == 0)).sum() for t in ths]))]) - T_final) < 1e-9
+ax.axvline(T_final, color="red", ls="--", lw=1.2)
+ax.text(T_final + 0.015, costs10[int(np.argmin(costs10))] * 2.2,
+        f"chosen T = {T_final:.2f}\n(all three ratios agree)", color="red", fontsize=9, va="center")
+ax.set_yscale("log")
+ax.set_xlabel("threshold"); ax.set_ylabel("expected cost  (log scale)")
+ax.set_title("Expected-cost curve on train+val (10·FN + 1·FP)")
+ax.legend(fontsize=9, loc="upper center")
+fig.savefig(A / "cost_curve.png", bbox_inches="tight"); plt.close(fig)
+print(f"T_final={T_final:.2f} | cost at T = {min(costs10)}")
 
 # ---- 5/6. CNN train curves + CNN reliability (from stored grid hist) ----
 import json as _json

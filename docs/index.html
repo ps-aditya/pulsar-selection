@@ -62,9 +62,11 @@ footer{color:var(--mut);font-size:.85rem;margin-top:32px}
 <p><strong>Final test evaluation (single pass, SEED=42):</strong> ROC-AUC <span class="ok">0.9777 ✓</span> (target ≥ 0.97; 95% CI 0.9671–0.9872) · PR-AUC 0.9332 (0.9117–0.9542) · precision @ T=0.54 <strong>0.9183</strong> · recall <strong>0.8567</strong> (CIs: precision 0.8889–0.9461, recall 0.8201–0.8933) · Brier 0.0166 · ECE 0.0099 · confusion TN 3227 / FP 25 / FN 47 / TP 281. Threshold T=0.54 chosen by the 10:1 cost model on train+val (FN=0 at 42 false alarms on the selection set); all of 5:1/10:1/20:1 select the same threshold.</p>
 <p class="miss">Honest misses: the joint target (recall ≥ 0.90 at precision ≥ 0.90) is not met at the cost-minimising threshold (recall 0.8567). Calibration improved nothing out of sample — the class-weighted raw forest is already near-calibrated (ECE 0.0099) and isotonic would collapse the ranking; "no calibration" is the measured, reported answer. Predictions, metrics and model hashes persisted in <code>results/</code>.</p>
 <div class="grid">
-<div><img src="assets/reliability.png" alt="Reliability diagram"><p>Reliability diagram (test): calibrated vs raw RF.</p></div>
-<div><img src="assets/learning_curve.png" alt="Learning curve"><p>Learning curve (PR-AUC): still rising — more labels would help.</p></div>
+<div><img src="assets/reliability.png" alt="Calibration study: reliability + CV Brier by method"><p>Calibration study (train+val basis): final raw-RF reliability + mean CV Brier by method (5×2 cross-fitted) — <strong>"none" selected</strong>; differences sit inside the CV noise band.</p></div>
+<div><img src="assets/learning_curve.png" alt="Learning curve"><p>Learning curve (PR-AUC, train-set CV): still rising — more labels would help.</p></div>
 </div>
+<p><img class="full" src="assets/cost_curve.png" alt="Expected-cost curve on train+val with chosen T marked"></p>
+<p>Expected-cost curve on train+val: minimum at <strong>T = 0.54</strong> — zero missed pulsars at 42 false alarms on the selection set; all three cost ratios (5:1, 10:1, 20:1) select the same threshold.</p>
 <p><img class="full" src="assets/importance.png" alt="Permutation importance"></p>
 <p>Permutation importance (validation set): <code>profile_kurtosis</code> dominates (PR-AUC drop 0.633) — pulse shape (sharp lighthouse blink vs noise smear) carries the signal, DM statistics confirm. Matches the astrophysics. Ablation on the winning CNN agrees: profile-only ROC 0.977 / PR 0.925, DM-only 0.896 / 0.373, full-8 0.982 / 0.938 — profile carries, DM refines.</p>
 </div>
