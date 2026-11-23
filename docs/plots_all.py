@@ -128,6 +128,22 @@ for b, v in zip(bars, [bal[0], bal[1]]):
             ha="center", va="bottom", fontsize=10)
 fig.savefig(A / "balance.png", bbox_inches="tight"); plt.close(fig)
 
+# ---- 1b. 8x8 feature correlation heatmap ----
+corr8 = df[feats].corr()
+fig, ax = plt.subplots(figsize=(6.4, 5.4))
+im = ax.imshow(corr8.values, cmap="RdBu_r", vmin=-1, vmax=1)
+ax.set_xticks(range(8)); ax.set_yticks(range(8))
+ax.set_xticklabels(feats, rotation=45, ha="right", fontsize=8.5)
+ax.set_yticklabels(feats, fontsize=8.5)
+for i in range(8):
+    for j in range(8):
+        v = corr8.values[i, j]
+        ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7.5,
+                color="white" if abs(v) > 0.5 else "black")
+ax.set_title("8×8 feature correlation (Pearson) — two physics blocks")
+fig.colorbar(im, ax=ax, fraction=0.046)
+fig.savefig(A / "corr8.png", bbox_inches="tight"); plt.close(fig)
+
 # ---- 2. calibration study (train+val basis): reliability + CV Brier by method ----
 fig, ax = plt.subplots(1, 2, figsize=(11.2, 4.3))
 ax[0].plot([0, 1], [0, 1], ls="--", color="gray", label="ideal")

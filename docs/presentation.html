@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 7 — Jury Presentation Deck</title>
+<style>
+:root{--bg:#0b1020;--card:#141b33;--ink:#e8ecf7;--mut:#9aa4c3;--acc:#7aa2ff;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:clamp(15px,1.6vw,20px)/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+.slide{display:none;position:fixed;inset:0;padding:4vh 6vw 8vh;flex-direction:column;justify-content:center}
+.slide.active{display:flex}
+h1{font-size:2.4em;line-height:1.15;margin-bottom:.3em}
+h2{font-size:1.7em;color:var(--acc);margin-bottom:.5em}
+p,li{max-width:60em}
+.mut{color:var(--mut)}
+.kicker{color:var(--acc);text-transform:uppercase;letter-spacing:.12em;font-size:.72em;font-weight:600;margin-bottom:.8em}
+.big{font-size:1.25em}
+.card{background:var(--card);border:1px solid #232d55;border-radius:12px;padding:1em 1.2em;margin:.5em 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2em;align-items:center}
+img{background:#fff;border-radius:10px;border:1px solid #2a3560;max-width:100%;max-height:66vh;display:block;margin:auto}
+table{border-collapse:collapse;width:100%;font-size:.85em;margin:.4em 0}
+th,td{border:1px solid #2a3560;padding:.45em .7em;text-align:left}
+th{background:#1a2342;color:var(--acc)}
+td:last-child{white-space:normal}
+.ok{color:var(--ok);font-weight:600}.miss{color:var(--warn);font-weight:600}.bad{color:var(--bad)}
+.term{background:#0e1430;border:1px solid #2c3a6b;border-radius:10px;padding:1em 1.2em;font:0.72em/1.5 Consolas,Menlo,monospace;color:#c9e3ff;white-space:pre;overflow:auto;max-height:60vh}
+.term b{color:var(--ok)}
+.quote{border-left:4px solid var(--acc);padding:.4em 1em;color:var(--mut);font-style:italic;margin:.6em 0}
+thesis{display:block;font-size:1.5em;color:var(--acc);font-weight:700;margin-top:1em}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:.6em 1.2em;background:rgba(11,16,32,.85);border-top:1px solid #232d55;font-size:.8em;color:var(--mut);z-index:9}
+nav button{background:#1d2748;color:var(--ink);border:1px solid #2c3a6b;border-radius:8px;padding:.35em 1em;cursor:pointer;font-size:1em}
+nav button:hover{background:#27346a}
+#notes{display:none;position:fixed;bottom:3.2em;left:0;right:0;background:#101731;border-top:2px solid var(--acc);padding:1em 6vw;color:var(--warn);font-size:.85em;z-index:8}
+#notes.on{display:block}
+.hint{font-size:.72em;color:var(--mut)}
+</style>
+</head>
+<body>
+
+<!-- 1 · TITLE -->
+<section class="slide active">
+  <p class="kicker">Project 7 · Pulsar Candidate Selection (HTRU2)</p>
+  <h1>The score was free.<br>We earned marks on everything the score hides.</h1>
+  <p class="big mut">A leakage-audited, cost-aware classical ML pipeline — calibrated probabilities, a written cost model, and an astrophysical reading of what the model learned.</p>
+  <p class="hint">← → to navigate · N for speaker notes · F11 fullscreen</p>
+</section>
+
+<!-- 2 · THE TRAP -->
+<section class="slide">
+  <h2>Why a high score is not the achievement</h2>
+  <div class="quote">"A competent Random Forest reaches excellent discrimination within minutes. That ease is precisely why the project is scoped differently: hitting a high score is not the achievement here." — the brief, §7.1</div>
+  <div class="card"><p><b>91.0%</b> accuracy — predict "not a pulsar" for every candidate. Completely worthless.</p></div>
+  <div class="card"><p><b>ROC ≈ 0.98</b> — nearly free for any reasonable model on 17,898 tabular candidates.</p></div>
+  <p class="big">So we built the project around what the brief actually scores: <b>trustworthy probabilities, a cost-model threshold, and interpretation.</b></p>
+</section>
+
+<!-- 3 · DATA -->
+<section class="slide">
+  <h2>The data — and the physics inside it</h2>
+  <div class="grid2">
+    <div>
+      <ul>
+        <li><b>17,898</b> human-verified candidates, High Time Resolution Universe Survey (South), Parkes</li>
+        <li><b>9.16%</b> genuine pulsars — 9.9:1 imbalance, retained as-is in the test set</li>
+        <li><b>8 features</b>: 4 statistics of the folded pulse profile, 4 of the DM–SNR curve</li>
+        <li>UCI id 372 · CC-BY 4.0 · DOI 10.24432/C5DK6R · release version + download date + acknowledgement in README</li>
+      </ul>
+    </div>
+    <div><img src="assets/balance.png" alt="class balance"></div>
+  </div>
+</section>
+
+<!-- 4 · CORRELATION -->
+<section class="slide">
+  <h2>Two physics blocks, visible in the correlation matrix</h2>
+  <div class="grid2">
+    <div><img src="assets/corr8.png" alt="8x8 correlation"></div>
+    <div>
+      <ul>
+        <li><b>Profile block:</b> mean ↔ kurtosis −0.87, skewness ↔ kurtosis +0.95 — one measurement, the folded profile</li>
+        <li><b>DM block:</b> mean ↔ stdev +0.80, stdev ↔ kurtosis −0.81, skewness ↔ kurtosis +0.92 — the dispersion sweep</li>
+        <li>Median |corr with target| only 0.446 — <b>no single feature suffices; modelling is justified</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · LEAKAGE AUDIT -->
+<section class="slide">
+  <h2>Before any model: can the numbers be trusted?</h2>
+  <div class="term">exact duplicate rows overall: <b>0</b>
+duplicates between train and val: <b>0</b>   train and test: <b>0</b>   val and test: <b>0</b>
+index disjointness: <b>OK (train/val/test pairwise disjoint)</b>
+train: n=10738  pos= 983  pos_rate=0.091544
+val:   n= 3580  pos= 328  pos_rate=0.091620
+test:  n= 3580  pos= 328  pos_rate=0.091620
+scaler fit on train only: <b>OK (n_samples_seen_ = 10738 == train size)</b>
+calibration fold disjoint from train and test: <b>OK</b></div>
+  <p class="big">Most teams <i>assert</i> "we did a stratified split". <b>We print the proof.</b></p>
+  <p class="hint">Notebook §6b — every line above is printed by code, not typed.</p>
+</section>
+
+<!-- 6 · TEST ONCE -->
+<section class="slide">
+  <h2>The test set is touched exactly once</h2>
+  <ul>
+    <li><b>Select</b> hyperparameters, calibration method, threshold — on <b>train + validation only</b></li>
+    <li><b>Evaluate once</b> in a single cell → writes <code>results/test_predictions.parquet</code>, <code>results/final_metrics.json</code></li>
+    <li><b>Persist</b> the fitted Random Forest + record SHA-256 hashes of all four artifacts</li>
+    <li><b>Every later analysis reads the saved predictions</b> — demonstrated in the notebook itself</li>
+  </ul>
+  <div class="card"><p>The tested RF: 400 trees, depth 20, min-leaf 2 — selected by 3-fold stratified CV on PR-AUC. Baseline: standardised logistic regression (val ROC 0.9744).</p></div>
+</section>
+
+<!-- 7 · CALIBRATION -->
+<section class="slide">
+  <h2>The assessed skill: calibration — tested properly</h2>
+  <div class="grid2">
+    <div><img src="assets/reliability.png" alt="calibration study"></div>
+    <div>
+      <ul>
+        <li>Four strategies: <b>none / sigmoid / isotonic / 5-fold cross-fitted sigmoid</b></li>
+        <li>Repeated stratified CV (5×2), <b>all calibrators cross-fitted</b> — none scored on its own training data</li>
+        <li>Selection by mean CV Brier, train+val only: <b>none wins</b> (0.01721); isotonic also degrades ranking</li>
+        <li>Test ECE <b>0.0099</b> — the class-weighted forest is already near-calibrated</li>
+      </ul>
+      <p class="hint">We report the tested answer, not the expected one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · COST MODEL -->
+<section class="slide">
+  <h2>Threshold from a written cost model — not 0.5</h2>
+  <div class="grid2">
+    <div><img src="assets/cost_curve.png" alt="cost curve"></div>
+    <div>
+      <ul>
+        <li>Written model: missed pulsar (FN) <b>costs 10</b> — lost discovery; false alarm (FP) <b>costs 1</b> — wasted telescope time</li>
+        <li>Curve minimum: <b>T = 0.54</b> — <b>zero missed pulsars at 42 false alarms</b> on the selection set</li>
+        <li>Sensitivity: 5:1, 10:1, 20:1 all select <b>the same T</b> — robust operating point</li>
+        <li>Test at T: <b>precision 0.918 · recall 0.857</b> — TN 3227 / FP 25 / FN 47 / TP 281</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · INTERPRETATION -->
+<section class="slide">
+  <h2>What the model listens to — the astrophysics</h2>
+  <div class="grid2">
+    <div><img src="assets/importance.png" alt="importance"></div>
+    <div>
+      <ul>
+        <li><b>profile_kurtosis dominates: PR-AUC drop 0.633</b> — 17× the runner-up</li>
+        <li>A pulsar is a lighthouse: the folded profile is a <b>sharp, peaked, repeating blink</b>; interference folds flat and near-Gaussian</li>
+        <li>DM statistics refine, not carry: <b>detect on shape, confirm on dispersion</b> — the real survey pipeline's structure</li>
+        <li>Learning curve still rising → <b>more labelled candidates would help</b>; the ceiling is information, not the model</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · RESULTS + MISSES -->
+<section class="slide">
+  <h2>Final test evaluation — single pass, with CIs, misses first</h2>
+  <table>
+    <tr><th>Metric</th><th>Estimate</th><th>95% CI (B=2000, paired)</th></tr>
+    <tr><td>ROC-AUC</td><td class="ok">0.9777 ✓ (target ≥ 0.97)</td><td>0.9671 – 0.9872</td></tr>
+    <tr><td>PR-AUC</td><td>0.9332</td><td>0.9117 – 0.9542</td></tr>
+    <tr><td>Precision @ T=0.54</td><td>0.9183</td><td>0.8889 – 0.9461</td></tr>
+    <tr><td>Recall @ T=0.54</td><td class="miss">0.8567 ✗ (target ≥ 0.90)</td><td>0.8201 – 0.8933</td></tr>
+    <tr><td>Brier / ECE</td><td>0.0166 / 0.0099</td><td>0.0135 – 0.0199</td></tr>
+  </table>
+  <div class="card"><p><b>Honest misses, documented:</b> recall≥0.90 at precision≥0.90 not met at the cost-optimal point; "improved Brier after calibration" not met — because cross-validated selection picked <i>no</i> calibration, with a measured reason. <span class="mut">Gate 4 allows "a documented reason why not" — ours is measured, not asserted.</span></p></div>
+</section>
+
+<!-- 11 · BEYOND -->
+<section class="slide">
+  <h2>Beyond the brief — done, demoted to appendix</h2>
+  <ul>
+    <li><b>Paired bootstrap CIs on every metric</b> (B=2000, stratified, seeded) + cost-ratio sensitivity table</li>
+    <li><b>Ground-up NumPy rebuild</b> of LogReg, tree, forest, MLP, 1D-CNN (~350 lines) — gradchecks 2.5e-08 / 6.6e-10, twins within ~0.002</li>
+    <li><b>1D-CNN replication</b> with paired significance: "CNN ranks marginally better, RF decides significantly better" (McNemar p=0.0001)</li>
+    <li><b>Error analysis</b>: the missed pulsars are feature-atypical, score ~0.1 — unrecoverable by thresholds; the fix is modality (plot pixels), and HTRU2 ships none</li>
+  </ul>
+  <p class="mut">The mainline is deliberately classical — the supplementary tracks support it, they don't replace it.</p>
+</section>
+
+<!-- 12 · REPRO + CLOSE -->
+<section class="slide">
+  <h2>Everything is reproducible</h2>
+  <ul>
+    <li>One command: <code>nbconvert --execute pulsar_selection.ipynb</code> — SEED=42, pinned requirements, cached data</li>
+    <li>Executed notebooks committed; site figures regenerate deterministically; models persisted with hashes</li>
+    <li>Every number in this deck is printed by a notebook cell</li>
+  </ul>
+  <thesis>"The score was free. We earned marks on everything the score hides."</thesis>
+</section>
+
+<!-- 13 · APPENDIX: RUBRIC MAP -->
+<section class="slide">
+  <h2>Appendix — rubric row → our evidence (handout)</h2>
+  <table>
+    <tr><th>Rubric row (weight)</th><th>Our claim</th><th>Evidence</th></tr>
+    <tr><td>Data curation (20%)</td><td>Card, 8×8 correlations, dedup audit, release version + download date + acknowledgement</td><td>§1–2, §5, §6b; README</td></tr>
+    <tr><td>Split discipline (20% — heaviest)</td><td>Stratified pre-weighting; leakage proven by code; test touched once</td><td>§6–6b, §10</td></tr>
+    <tr><td>Modelling (20%)</td><td>LogReg baseline alongside CV-tuned RF; hyperparameters recorded</td><td>§7</td></tr>
+    <tr><td>Evaluation (20%)</td><td>Imbalance-correct metrics, bootstrap CIs, worst-case inspection</td><td>§8–10; v4 notebook</td></tr>
+    <tr><td>Report & repo (10%)</td><td>One-command repro, honest limitations, report v1.0</td><td>paper.md, README, executed nb</td></tr>
+    <tr><td>Viva (10%)</td><td>Split strategy + metric choice defensible per member</td><td>VIVA_PREP.md</td></tr>
+  </table>
+</section>
+
+<div id="notes"></div>
+<nav>
+  <span>Project 7 · Pulsar Candidate Selection (HTRU2)</span>
+  <span><button onclick="go(-1)">◀</button> <span id="ctr">1 / 13</span> <button onclick="go(1)">▶</button></span>
+</nav>
+<script>
+const S=[...document.querySelectorAll('.slide')],N=document.getElementById('notes'),C=document.getElementById('ctr');
+let i=0;
+const NOTES=[
+"Thesis line. Say it once here and repeat at the close.",
+"Name the trap before the jury does. Quote the brief. Never open with our ROC number.",
+"Prevalence once: 9.16%. Everything downstream is chosen because of this number.",
+"Two physics blocks: profile shape and dispersion sweep. No single feature suffices.",
+"The heaviest-weighted rubric row. Stress: printed by code, not typed. This is where marks live.",
+"Single test evaluation = selection on train+val only. One cell writes artifacts with hashes.",
+"The boldest slide: the brief expects calibration to help; our CV-tested answer is that it doesn't. Isotonic collapses ranking.",
+"Written 10:1 cost model. T=0.54: FN=0 at 42 FP. Robust across 5:1–20:1.",
+"Kurtosis = lighthouse physics. Detect on shape, confirm on dispersion.",
+"Lead with the green check, then volunteer both misses. Gate 4: documented reason why not.",
+"Keep this fast — one slide, supplementary only. Don't let the CNN steal the mainline.",
+"Close by repeating the thesis line.",
+"Leave on screen during Q&A — it pre-answers 'where is X in the rubric?'"];
+function show(){S.forEach((s,j)=>s.classList.toggle('active',j===i));C.textContent=(i+1)+" / "+S.length;N.textContent="NOTES — "+NOTES[i];}
+function go(d){i=Math.min(S.length-1,Math.max(0,i+d));show();}
+document.addEventListener('keydown',e=>{
+ if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(1);
+ else if(e.key==='ArrowLeft'||e.key==='PageUp')go(-1);
+ else if(e.key.toLowerCase()==='n')N.classList.toggle('on');
+ else if(e.key==='Home'){i=0;show();}else if(e.key==='End'){i=S.length-1;show();}
+});
+document.body.addEventListener('click',e=>{if(e.target.tagName!=='BUTTON')go(e.clientX>innerWidth/2?1:-1);});
+show();
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3-minute video prototype — animatic (Project 7)</title>
+<style>
+:root{--bg:#0b1020;--card:#141b33;--ink:#e8ecf7;--mut:#9aa4c3;--acc:#7aa2ff;--ok:#4ade80;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:clamp(15px,1.7vw,21px)/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#stage{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:4vh 6vw 1vh;position:relative}
+.scene{display:none;text-align:center;max-width:64em}
+.scene.on{display:block}
+.scene img{background:#fff;border-radius:12px;border:1px solid #2a3560;max-width:100%;max-height:52vh;display:block;margin:0 auto 1em}
+.scene h1{font-size:2.3em;line-height:1.2;margin-bottom:.4em}
+.scene h2{font-size:1.6em;color:var(--acc);margin-bottom:.5em}
+.scene .card{background:var(--card);border:1px solid #232d55;border-radius:12px;padding:1em 1.3em;margin:.5em auto;max-width:56em;text-align:left}
+.scene .close{font-size:1.7em;color:var(--acc);font-weight:700}
+.term{background:#0e1430;border:1px solid #2c3a6b;border-radius:10px;padding:1em 1.2em;font:.68em/1.5 Consolas,Menlo,monospace;color:#c9e3ff;white-space:pre;text-align:left;max-height:50vh;overflow:auto}
+.term b{color:var(--ok)}
+table{border-collapse:collapse;font-size:.8em;margin:.4em auto}
+th,td{border:1px solid #2a3560;padding:.4em .8em;text-align:left}
+th{background:#1a2342;color:var(--acc)}
+#narr{background:#101731;border-top:2px solid var(--acc);padding:1.1em 8vw;font-size:1.05em;color:var(--ink);min-height:7.5em}
+#narr .lab{color:var(--acc);font-size:.7em;text-transform:uppercase;letter-spacing:.12em;display:block;margin-bottom:.3em}
+#barwrap{height:6px;background:#1a2342}
+#bar{height:100%;width:0%;background:var(--acc)}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:.45em 1.2em;font-size:.8em;color:var(--mut);border-top:1px solid #232d55}
+#hud button{background:#1d2748;color:var(--ink);border:1px solid #2c3a6b;border-radius:8px;padding:.3em .9em;cursor:pointer;font-size:1em;margin-left:.4em}
+#tc{font-family:Consolas,Menlo,monospace;color:var(--acc)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="narr"><span class="lab">Narration</span><span id="narrtext"></span></div>
+<div id="barwrap"><div id="bar"></div></div>
+<div id="hud">
+  <span>Animatic · 180 s · space = pause · ← → jump scene · restart = ⟳ · then record over it</span>
+  <span><span id="tc">0:00 / 3:00</span><button id="pp" onclick="toggle()">⏸</button><button onclick="jump(-1)">◀</button><button onclick="jump(1)">▶</button><button onclick="reset()">⟳</button></span>
+</div>
+<script>
+const SCENES=[
+{d:15,html:`<h1>Pulsar Candidate Selection — Project 7</h1><div class="card" style="text-align:center"><b style="font-size:1.4em">91% accuracy — free.</b><br><span style="color:var(--mut)">predict "not a pulsar" for every candidate</span></div>`,
+ n:"Here is a dataset where doing almost nothing scores ninety-one percent — just predict 'not a pulsar' for every candidate. And a random forest reaches ninety-eight percent discrimination in minutes. So on this project, the score was never the point."},
+{d:13,html:`<img src="assets/balance.png" alt="balance">`,
+ n:"HTRU2: seventeen thousand eight hundred ninety-eight human-verified candidates from the High Time Resolution Universe survey. Nine point one six percent are genuine pulsars."},
+{d:12,html:`<img src="assets/corr8.png" alt="correlations">`,
+ n:"Each candidate is eight numbers — four statistics of its folded pulse profile, four of its dispersion curve. The correlation matrix shows two clean physics blocks: profile shape, and dispersion sweep."},
+{d:30,html:`<h2>Leakage audit — printed by code (§6b)</h2><div class="term">exact duplicate rows overall: <b>0</b>
+duplicates train↔val: <b>0</b>  train↔test: <b>0</b>  val↔test: <b>0</b>
+index disjointness: <b>OK (train/val/test pairwise disjoint)</b>
+train: n=10738  pos_rate=0.091544
+val:   n= 3580  pos_rate=0.091620
+test:  n= 3580  pos_rate=0.091620
+scaler fit on train only: <b>OK (n_samples_seen_ = 10738)</b>
+calibration fold disjoint from train and test: <b>OK</b></div>`,
+ n:"Before any model, we made the numbers trustworthy. A code-printed leakage audit: zero duplicate rows overall and across every split pair; the three index sets pairwise disjoint; the scaler saw exactly the ten thousand seven hundred thirty-eight training rows; the calibration fold is disjoint from both. And the test set is evaluated exactly once — everything else is selected on train plus validation only."},
+{d:35,html:`<h2>Calibration study — the tested answer</h2><img src="assets/reliability.png" alt="calibration">`,
+ n:"The brief expects calibration to improve the Brier score. We tested it properly: four strategies — no calibration, sigmoid, isotonic, and cross-fitted sigmoid — under repeated cross-validated Brier on train plus validation. The winner: no calibration. The class-weighted forest is already near-calibrated — expected calibration error under one percent — and isotonic would collapse the ranking. We report the tested answer, not the expected one."},
+{d:30,html:`<h2>Threshold from a written cost model (10:1)</h2><img src="assets/cost_curve.png" alt="cost curve">`,
+ n:"The operating threshold comes from a written cost model: a missed pulsar costs ten; a wasted follow-up costs one. The expected-cost curve bottoms at threshold zero point five four — zero missed pulsars at forty-two false alarms on the selection set — and all three cost ratios we tested, five-to-one, ten-to-one, twenty-to-one, pick the same threshold."},
+{d:20,html:`<h2>The model listens to pulse shape</h2><img src="assets/importance.png" alt="importance">`,
+ n:"So what does the model listen to? Profile kurtosis — by a factor of seventeen over anything else. That's the lighthouse: a real pulsar folds to a sharp, peaked blink; interference folds flat. The dispersion statistics confirm the detection."},
+{d:20,html:`<h2>Final test evaluation — one pass, misses first</h2>
+<table><tr><th>Metric</th><th>Estimate</th><th>95% CI</th></tr>
+<tr><td>ROC-AUC</td><td style="color:var(--ok)">0.9777 ✓</td><td>0.9671–0.9872</td></tr>
+<tr><td>PR-AUC</td><td>0.9332</td><td>0.9117–0.9542</td></tr>
+<tr><td>Precision @ T</td><td>0.9183</td><td>0.8889–0.9461</td></tr>
+<tr><td>Recall @ T</td><td style="color:var(--warn)">0.8567 ✗ target</td><td>0.8201–0.8933</td></tr>
+<tr><td>Brier / ECE</td><td>0.0166 / 0.0099</td><td>0.0135–0.0199</td></tr></table>`,
+ n:"Final test evaluation, one pass, with bootstrap confidence intervals: ROC-AUC zero point nine seven seven seven. And the honest misses first: the recall-at-precision target is not met at the cost-optimal point, and calibration did not improve the Brier — both documented with measured reasons."},
+{d:5,html:`<div class="close">"The score was free.<br>We earned marks on everything the score hides."</div>`,
+ n:"The score was free. We earned marks on everything the score hides."}];
+
+const stage=document.getElementById('stage'),narrT=document.getElementById('narrtext'),
+      bar=document.getElementById('bar'),tc=document.getElementById('tc'),pp=document.getElementById('pp');
+SCENES.forEach((s,i)=>{const d=document.createElement('div');d.className='scene';d.id='sc'+i;d.innerHTML=s.html;stage.appendChild(d);});
+let elapsed=0,timer=null,lastWall=null;
+const TOTAL=SCENES.reduce((a,s)=>a+s.d,0);
+function starts(){let a=0;SCENES.forEach((s,i)=>{s.t0=a;s.t1=a+s.d;a+=s.d;});}
+starts();
+function fmt(x){return Math.floor(x/60)+":"+String(Math.floor(x%60)).padStart(2,'0');}
+function sceneAt(t){for(let i=0;i<SCENES.length;i++)if(t<SCENES[i].t1)return i;return SCENES.length-1;}
+function render(){
+ let s=sceneAt(elapsed);
+ SCENES.forEach((sc,i)=>document.getElementById('sc'+i).classList.toggle('on',i===s));
+ narrT.textContent=SCENES[s].n;
+ bar.style.width=(elapsed/TOTAL*100)+"%";
+ tc.textContent=fmt(elapsed)+" / "+fmt(TOTAL);
+}
+// wall-clock loop: stays correct even when the tab is backgrounded or paint-throttled
+function startLoop(){ if(timer)return; lastWall=Date.now(); timer=setInterval(()=>{
+ const now=Date.now(); elapsed=Math.min(TOTAL,elapsed+(now-lastWall)/1000); lastWall=now;
+ render(); if(elapsed>=TOTAL)stopLoop();
+},200); }
+function stopLoop(){ if(timer){clearInterval(timer);timer=null;} }
+function toggle(){ if(timer){stopLoop();pp.textContent='▶';}else{startLoop();pp.textContent='⏸';} }
+function jump(d){
+ stopLoop();
+ let s=sceneAt(elapsed);
+ elapsed=(d>0)?Math.min(SCENES[s].t1+0.01,TOTAL-0.01):Math.max(SCENES[Math.max(0,s-1)].t0,0);
+ render(); startLoop();
+}
+function reset(){ stopLoop(); elapsed=0; render(); startLoop(); }
+document.addEventListener('keydown',e=>{
+ if(e.key===' '){e.preventDefault();toggle();}
+ else if(e.key==='ArrowRight')jump(1);else if(e.key==='ArrowLeft')jump(-1);
+ else if(e.key.toLowerCase()==='r')reset();
+});
+render();startLoop();
+</script>
+</body>
+</html>
