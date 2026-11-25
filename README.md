@@ -19,6 +19,11 @@ Classical machine-learning mainline: leakage-audited split, CV-tuned Random Fore
 | `pulsar_selection_groundup.ipynb` (+ executed) | Side-by-side twin comparison: logreg ROC exact, tree 99.16% agreement, MLP gradcheck 2.5e-08, CNN gradcheck 6.6e-10, all metrics within band |
 | `paper.md` | Project 7 report (v1.0): classical mainline with calibrated results + supplementary-tracks appendix |
 | `VIVA_PREP.md` | Viva Q&A: split strategy, metric choice, calibration study, cost model — each answer tied to a repo artifact |
+| `DATA_CARD.md` | Data card: provenance, release, licence, acknowledgement, splits, known biases |
+| `METRIC_JUSTIFICATION.md` | Why accuracy is not used; metric and cost-model justification (written retrospectively) |
+| `docs/poster.html` | A2 poster (print to PDF) |
+| `docs/VIDEO_SCRIPT.md` | 3-minute video script |
+| `LICENSE` | MIT (code); data keep CC-BY 4.0 |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |
 | `docs/` | GitHub Pages progress site (served from `/docs`) |
