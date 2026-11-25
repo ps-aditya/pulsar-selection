@@ -17,12 +17,12 @@ Classical machine-learning mainline: leakage-audited split, CV-tuned Random Fore
 | `pulsar_selection_v4_errors.executed.ipynb` | v4 executed copy |
 | `from_scratch/` | Ground-up NumPy reimplementations: `logreg.py`, `trees.py`, `mlp.py`, `cnn1d.py` (~350 lines, no libraries inside the models) |
 | `pulsar_selection_groundup.ipynb` (+ executed) | Side-by-side twin comparison: logreg ROC exact, tree 99.16% agreement, MLP gradcheck 2.5e-08, CNN gradcheck 6.6e-10, all metrics within band |
-| `paper.md` | Project 7 report (v1.0): classical mainline with calibrated results + supplementary-tracks appendix |
-| `VIVA_PREP.md` | Viva Q&A: split strategy, metric choice, calibration study, cost model — each answer tied to a repo artifact |
-| `DATA_CARD.md` | Data card: provenance, release, licence, acknowledgement, splits, known biases |
-| `METRIC_JUSTIFICATION.md` | Why accuracy is not used; metric and cost-model justification (written retrospectively) |
-| `docs/poster.html` | A2 poster (print to PDF) |
-| `docs/VIDEO_SCRIPT.md` | 3-minute video script |
+| `paper.md` / `paper.pdf` | Project 7 final report (v2.0, 13 pages A4 PDF): classical mainline with calibrated results, threshold reconciliation, error analysis + supplementary-tracks appendix |
+| `VIVA_PREP.md` | Viva Q&A (Q1–Q14): split strategy, metric choice, calibration study, cost model, 0.54 vs 0.091 threshold reconciliation — each answer tied to a repo artifact |
+| `DATA_CARD.md` | Data card: provenance, release, licence, acknowledgement, splits, 8 known biases |
+| `METRIC_JUSTIFICATION.md` | Gate 1–5 milestone record, rejection of 90.84% accuracy trap, metric & 10:1 cost-model justification |
+| `docs/poster.html` / `docs/poster.pdf` | A2 landscape poster (HTML + ready-to-print A2 PDF) |
+| `docs/VIDEO_SCRIPT.md` / `docs/Pulsar_Project_Video.mp4` | 3-minute (180 s) shot-by-shot script and rendered 1280×720 HD MP4 video |
 | `LICENSE` | MIT (code); data keep CC-BY 4.0 |
 | `data/HTRU_2.csv` | Cached HTRU2 data (re-downloaded automatically if missing) |
 | `requirements.txt` | Pinned environment (torch CPU for v2) |

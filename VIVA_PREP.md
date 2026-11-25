@@ -85,8 +85,16 @@ Every answer below is grounded in a specific repo artifact. Say the artifact, th
 
 ## 13. "The textbook rule says 0.09. Why did you pick 0.54?"
 
-**Artifacts:** §9 cost curve; `paper.md` §5.
+**Artifacts:** §8–9 cost curve (`pulsar_selection.ipynb`); `METRIC_JUSTIFICATION.md` §4.2; `paper.md` §6.
 
-- Textbook rule: t* = C_FP / (C_FP + C_FN) = 1/11 ≈ 0.09, but only if the probabilities are calibrated to the true risk.
-- Our choice is the empirical minimum of the expected-cost curve on train+val: 0.54 (0 missed pulsars, 42 false alarms). We chose the measured minimum, not the formula.
-- We do not have a full explanation for the gap. Say so. Do not claim the threshold is the posterior cut.
+- Under the natural 9.16% survey prior ($\pi = 0.0916$), the textbook Bayes cut-off for a 10:1 cost ratio is $t_{\text{nat}}^* = \frac{C_{\text{FP}}}{C_{\text{FP}} + C_{\text{FN}}} = \frac{1}{11} \approx 0.0909$. In fact, in our earlier Gate 3/4 run (`commit 14e98dc`), when Platt scaling was fitted on the unweighted validation fold `X_va`, the empirical minimum landed at **$T = 0.10$**.
+- In the final protocol (`commit 813ba86`), repeated CV Brier selected `"none"` — the raw Random Forest trained with `class_weight="balanced_subsample"`. Two effects move the optimum from $0.091$ to $0.54$:
+  1. **Balanced-subsample prior shift ($0.091 \to 0.498$):** `balanced_subsample` reweights the 9.16% positive class to 50/50 inside every tree (a weight factor of $w_+ = \frac{1-\pi}{\pi} = \frac{16,259}{1,639} \approx 9.92$). By Bayes' rule, $t_{\text{nat}}^* = 1/11$ maps into balanced-prior score space at $t_{\text{bal}}^* = \frac{9.92 \times (1/11)}{9.92 \times (1/11) + (10/11)} = \frac{9.92}{19.92} \approx 0.498$. Because the 10:1 cost ratio almost cancels the 9.92:1 imbalance weight, the theoretical cut-off in balanced-forest score space is $\approx 0.50$.
+  2. **Selection-set refit evaluation ($0.498 \to 0.54$):** In §8–9, `base_final` (depth 20, `min_samples_leaf=2`) is refit on `X_tv` (`train+val`, $n = 14,318$) and the cost curve is evaluated on `p_tv`. On `X_tv`, every true pulsar scores above $0.54$ ($\text{FN} = 0, \text{FP} = 42$ at $T = 0.54$), so raising $T$ from $0.50$ to $0.54$ pays zero FN penalty while trimming false alarms.
+
+## 14. "When was the metric justification written, and why is this a 2-member team?"
+
+**Artifacts:** `METRIC_JUSTIFICATION.md` §1; git commit history (`9014928` on `2026-08-11`, `14e98dc` on `2026-09-25`).
+
+- **Gate 1 & Gate 2 provenance:** The written metric justification (rejecting the 90.84% accuracy trap in favour of ROC-AUC, PR-AUC, recall/precision at a cost threshold, and Brier score), the stratified 60/20/20 split *before* any weighting, and the 10:1 cost model were committed in `pulsar_selection.ipynb` (§1–3, §6, §8) on **2026-09-25** (`commit 14e98dc`), following the initial repository setup on **2026-08-11** (`commit 9014928`). They are also compiled in `METRIC_JUSTIFICATION.md` and `DATA_CARD.md`.
+- **Team structure:** The project was executed by a 2-member team (**Aditya Shaji** and **Atharav Gavankar**) under the supervision of **Prof. Dr. Rabinder Henry**, completing the full 12-week classical mainline plus four supplementary tracks (1D-CNN replication, temperature scaling + paired significance, error analysis + ablation, and ground-up NumPy reimplementations).

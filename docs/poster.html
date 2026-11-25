@@ -25,9 +25,8 @@
   .step .bd { padding: 8px 8px 10px 8px; font-size: 21px; line-height: 1.25; }
   .step .bd b { color: var(--c); }
 
-  .headline { margin: 0 60px; background: #fff; border-left: 14px solid #e8833a; border-radius: 10px; padding: 10px 26px; font-size: 24px; box-shadow: 0 4px 0 #c7ced9; }
-
-  main { height: 800px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; padding: 0 60px; }
+  .headline { margin: 0 60px; background: #fff; border-left: 14px solid #e8833a; border-radius: 10px; padding: 10px 24px; font-size: 22px; box-shadow: 0 4px 0 #c7ced9; white-space: nowrap; }
+  main { height: 785px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; padding: 0 60px; }
   .col { display: flex; flex-direction: column; gap: 22px; min-height: 0; }
   .card { background: #fff; border-radius: 14px; box-shadow: 0 4px 0 #c7ced9; overflow: hidden; }
   .card h2 { margin: 0; padding: 9px 20px; font-size: 29px; font-weight: 800; color: #fff; background: var(--c); }
@@ -49,8 +48,9 @@
   .split div { display: flex; align-items: center; justify-content: center; height: 100%; }
   .card img { display: block; width: 100%; }
 
-  .bottom { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 22px; padding: 0 60px; height: 290px; }
+  .bottom { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 22px; padding: 0 60px; height: 325px; }
   .bottom .card { height: 100%; }
+  .bottom .card .bd { padding: 10px 18px 10px 18px; font-size: 20.5px; line-height: 1.26; }
   .bottom li { margin-bottom: 3px; }
   .did li::marker { color: #0f8a5f; }
   .didnt li::marker { color: #c0392b; }
@@ -75,7 +75,7 @@
   <div class="step" style="--c:#14a88a"><div class="hd">6 Explain</div><div class="bd">Permutation importance<br>+ learning curve</div></div>
 </section>
 
-<div class="headline"><b>Headline:</b> the forest ranks well (ROC-AUC 0.978), but no calibrator helped, and the cost model set the cut-off at 0.54, not the textbook 0.09 (gap not yet explained).</div>
+<div class="headline"><b>Headline:</b> RF ranks at ROC-AUC 0.9777; no calibrator beat the raw forest (ECE 0.0099); 10:1 cost picks <b>T = 0.54</b> (9.92× balanced weight maps 1/11 ≈ 0.091 → 0.498; train+val zero-FN knee at 0.54).</div>
 
 <main>
 
@@ -155,7 +155,7 @@
       <h2>Cut-off from a cost model</h2>
       <div class="bd">
         <div class="box">Missed pulsar (FN) = <b>10</b>. Wasted follow-up (FP) = <b>1</b>. Pick the threshold that minimises total cost on train+val.</div>
-        <img src="assets/cost_curve.png" alt="expected cost curve" style="max-height:230px;object-fit:contain">
+        <img src="assets/cost_curve.png" alt="expected cost curve" style="max-height:216px;object-fit:contain">
         <p class="small">Minimum at <b>T = 0.54</b>: 0 missed pulsars, 42 false alarms (selection set). Ratios 5:1, 10:1 and 20:1 all pick it.</p>
       </div>
     </div>
@@ -188,7 +188,7 @@
     <div class="card" style="--c:#14a88a">
       <h2>What did it learn?</h2>
       <div class="bd">
-        <img src="assets/importance.png" alt="permutation importance" style="max-height:230px;object-fit:contain">
+        <img src="assets/importance.png" alt="permutation importance" style="max-height:218px;object-fit:contain">
         <p class="small"><b>Profile kurtosis</b> (how sharply the pulse peaks) matters 17× more than any other feature. Real pulsars fold to a sharp, repeating blink; interference folds flat. Dispersion statistics refine the decision but do not carry it.</p>
       </div>
     </div>
@@ -217,7 +217,7 @@
       <ul class="didnt">
         <li><b>Recall ≥ 0.90 at precision ≥ 0.90:</b> not met (recall 0.857)</li>
         <li><b>Brier better after calibration:</b> not met; no calibrator won</li>
-        <li><b>Threshold gap:</b> textbook 0.09 vs measured 0.54, unexplained</li>
+        <li><b>Threshold shift (0.091 → 0.54):</b> <code>balanced_subsample</code> (9.92× prior weight) shifts textbook 1/11 ≈ 0.091 to 0.498, and refitted train+val zero-FN knee sits at 0.54</li>
         <li><b>Misses are confidently wrong:</b> 47 of 328 pulsars, median score ~0.1; threshold moves do not recover them</li>
         <li><b>Scope:</b> 10:1 cost is a stated choice; one survey, eight summary numbers; no new pulsars found</li>
       </ul>

@@ -138,9 +138,9 @@ calibration fold disjoint from train and test: <b>OK</b></div>
     <div>
       <ul>
         <li>Written model: missed pulsar (FN) <b>costs 10</b> — lost discovery; false alarm (FP) <b>costs 1</b> — wasted telescope time</li>
-        <li>Curve minimum: <b>T = 0.54</b> — <b>zero missed pulsars at 42 false alarms</b> on the selection set</li>
-        <li>Sensitivity: 5:1, 10:1, 20:1 all select <b>the same T</b> — robust operating point</li>
-        <li>Test at T: <b>precision 0.918 · recall 0.857</b> — TN 3227 / FP 25 / FN 47 / TP 281</li>
+        <li>Curve minimum: <b>T = 0.54</b> — <b>zero missed pulsars at 42 false alarms</b> on the selection set (5:1, 10:1, 20:1 agree)</li>
+        <li><b>Why 0.54 vs textbook 1/11 ≈ 0.091?</b> <code>balanced_subsample</code> (9.92× positive weight) shifts 0.091 → 0.498 in balanced score space, and the refitted train+val zero-FN knee lands at 0.54</li>
+        <li>Test at T=0.54: <b>precision 0.918 · recall 0.857</b> — TN 3227 / FP 25 / FN 47 / TP 281</li>
       </ul>
     </div>
   </div>
@@ -156,7 +156,7 @@ calibration fold disjoint from train and test: <b>OK</b></div>
         <li><b>profile_kurtosis dominates: PR-AUC drop 0.633</b> — 17× the runner-up</li>
         <li>A pulsar is a lighthouse: the folded profile is a <b>sharp, peaked, repeating blink</b>; interference folds flat and near-Gaussian</li>
         <li>DM statistics refine, not carry: <b>detect on shape, confirm on dispersion</b> — the real survey pipeline's structure</li>
-        <li>Learning curve still rising → <b>more labelled candidates would help</b>; the ceiling is information, not the model</li>
+        <li>Learning curve (3-fold CV up to 7,159 labels) rises to ~0.92 PR-AUC by ~5,500 labels, then flattens → <b>ceiling in this range is feature information, not label count</b></li>
       </ul>
     </div>
   </div>
