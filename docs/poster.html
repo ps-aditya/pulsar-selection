@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finding Pulsars in a Haystack of Noise — A2 poster</title>
+<style>
+  @page { size: 594mm 420mm; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 2245px; height: 1587px; overflow: hidden;
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-size: 22px; line-height: 1.3; color: #1b2433; background: #eef1f5;
+  }
+  .poster { width: 2245px; height: 1587px; padding: 0 0 18px 0; display: flex; flex-direction: column; gap: 18px; }
+
+  header { background: #14213d; color: #fff; padding: 22px 60px 18px 60px; border-bottom: 12px solid #e8833a; }
+  header h1 { margin: 0; font-size: 88px; font-weight: 800; letter-spacing: -1px; line-height: 1.05; }
+  header .sub { margin-top: 8px; font-size: 34px; color: #c8d3ea; }
+  header .team { margin-top: 12px; font-size: 24px; color: #9fb0cf; }
+
+  .pipe { display: grid; grid-template-columns: repeat(6, 1fr); padding: 0 60px; gap: 22px; }
+  .step { background: #fff; border-radius: 12px; border: 3px solid var(--c); overflow: hidden; text-align: center; box-shadow: 0 4px 0 #c7ced9; }
+  .step .hd { background: var(--c); color: #fff; font-weight: 800; font-size: 28px; padding: 6px 6px; }
+  .step .bd { padding: 8px 8px 10px 8px; font-size: 21px; line-height: 1.25; }
+  .step .bd b { color: var(--c); }
+
+  .headline { margin: 0 60px; background: #fff; border-left: 14px solid #e8833a; border-radius: 10px; padding: 10px 26px; font-size: 24px; box-shadow: 0 4px 0 #c7ced9; }
+
+  main { height: 800px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; padding: 0 60px; }
+  .col { display: flex; flex-direction: column; gap: 22px; min-height: 0; }
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 4px 0 #c7ced9; overflow: hidden; }
+  .card h2 { margin: 0; padding: 9px 20px; font-size: 29px; font-weight: 800; color: #fff; background: var(--c); }
+  .card .bd { padding: 12px 18px 14px 18px; }
+  .card p { margin: 0 0 8px 0; }
+  .card ul { margin: 0; padding-left: 22px; }
+  .card li { margin-bottom: 4px; }
+  .cap { font-size: 19px; color: #4f5868; font-style: italic; margin-top: 4px; }
+  .small { font-size: 19px; color: #3b4456; }
+  .box { background: #fdf3e7; border-left: 7px solid #e8833a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; }
+  .tag-met { color: #0f8a5f; font-weight: 800; }
+  .tag-no { color: #c0392b; font-weight: 800; }
+  table { border-collapse: collapse; width: 100%; font-size: 20px; }
+  th { background: #14213d; color: #fff; padding: 5px 6px; text-align: right; font-weight: 700; }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 4px 6px; border-bottom: 1px solid #e3e7ee; text-align: right; }
+  tr.target td { background: #e7f6ef; font-weight: 700; }
+  .split { display: flex; height: 52px; border-radius: 8px; overflow: hidden; font-size: 20px; font-weight: 700; color: #fff; text-align: center; }
+  .split div { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .card img { display: block; width: 100%; }
+
+  .bottom { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 22px; padding: 0 60px; height: 290px; }
+  .bottom .card { height: 100%; }
+  .bottom li { margin-bottom: 3px; }
+  .did li::marker { color: #0f8a5f; }
+  .didnt li::marker { color: #c0392b; }
+  code { font-family: Consolas, monospace; font-size: 19px; background: #eef1f5; padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+<header>
+  <h1>Finding Pulsars in a Haystack of Noise</h1>
+  <div class="sub">A calibrated, cost-aware pulsar candidate selector on the HTRU2 radio-survey dataset</div>
+  <div class="team">Team: Aditya Shaji · Atharav Gavankar &nbsp;|&nbsp; Second Year B.Tech CSE (AI &amp; ML) &nbsp;|&nbsp; Project 7, Section A: Astrophysics &nbsp;|&nbsp; Guide: Prof. Dr. Rabinder Henry</div>
+</header>
+
+<section class="pipe">
+  <div class="step" style="--c:#14213d"><div class="hd">1 Load</div><div class="bd">17,898 candidates<br>8 numbers each</div></div>
+  <div class="step" style="--c:#d64545"><div class="hd">2 Split first</div><div class="bd">Train / Val / <b>Test</b><br>test opened once</div></div>
+  <div class="step" style="--c:#2f6fdb"><div class="hd">3 Two models</div><div class="bd">Logistic regression<br>vs Random Forest</div></div>
+  <div class="step" style="--c:#6b4fbb"><div class="hd">4 Calibrate</div><div class="bd">Tested 4 ways.<br><b>None</b> was best</div></div>
+  <div class="step" style="--c:#e8833a"><div class="hd">5 Threshold</div><div class="bd">Cost 10 : 1<br>T = <b>0.54</b> (not 0.5)</div></div>
+  <div class="step" style="--c:#14a88a"><div class="hd">6 Explain</div><div class="bd">Permutation importance<br>+ learning curve</div></div>
+</section>
+
+<div class="headline"><b>Headline:</b> the forest ranks well (ROC-AUC 0.978), but no calibrator helped, and the cost model set the cut-off at 0.54, not the textbook 0.09 (gap not yet explained).</div>
+
+<main>
+
+  <!-- COLUMN 1 -->
+  <div class="col">
+    <div class="card" style="--c:#e8833a">
+      <h2>The problem</h2>
+      <div class="bd">
+        <ul>
+          <li>A radio survey flags thousands of "maybe-pulsar" signals. Almost all are interference or noise.</li>
+          <li><b>Pulsar:</b> a spinning dead star that blinks like a lighthouse.</li>
+          <li><b>Only 9.16%</b> of candidates are real (1,639 of 17,898).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="--c:#d64545">
+      <h2>Why not accuracy?</h2>
+      <div class="bd">
+        <p>A model that always says "not a pulsar" scores <b>90.8% accuracy</b> and finds <b>0 pulsars</b>.</p>
+        <p>So we report ROC-AUC, PR-AUC, precision, recall, and Brier score.</p>
+      </div>
+    </div>
+
+    <div class="card" style="--c:#14213d">
+      <h2>What the brief asked for</h2>
+      <div class="bd">
+        <ul style="list-style:none;padding-left:0">
+          <li>ROC-AUC ≥ 0.97 &nbsp;<span class="tag-met">MET</span></li>
+          <li>Recall ≥ 0.90 at precision ≥ 0.90 &nbsp;<span class="tag-no">NOT MET</span></li>
+          <li>Brier improves after calibration &nbsp;<span class="tag-no">NOT MET</span></li>
+          <li>Split before any resampling &nbsp;<span class="tag-met">DONE</span></li>
+          <li>Threshold from a cost model &nbsp;<span class="tag-met">DONE</span></li>
+          <li>Learning curve + importance &nbsp;<span class="tag-met">DONE</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLUMN 2 -->
+  <div class="col">
+    <div class="card" style="--c:#d64545">
+      <h2>Fair testing: split first</h2>
+      <div class="bd">
+        <p class="small">Stratified 60 / 20 / 20. Every part keeps ~9.16% pulsars.</p>
+        <div class="split">
+          <div style="width:60%;background:#2f6fdb">Train 10,738</div>
+          <div style="width:20%;background:#e8833a">Val 3,580</div>
+          <div style="width:20%;background:#d64545">Test 3,580</div>
+        </div>
+        <ul style="margin-top:8px">
+          <li>Weights and calibration fit inside train / val only.</li>
+          <li>Leakage audit: 0 duplicate rows; index sets disjoint.</li>
+          <li>Models: logistic regression baseline vs Random Forest (400 trees), same splits.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="--c:#6b4fbb">
+      <h2>Calibration: "80% sure"?</h2>
+      <div class="bd">
+        <table>
+          <tr><th>Method</th><th>Mean CV Brier (lower = better)</th></tr>
+          <tr><td><b>none</b> (chosen)</td><td><b>0.01721</b></td></tr>
+          <tr><td>sigmoid</td><td>0.01721</td></tr>
+          <tr><td>cross-fitted sigmoid</td><td>0.01723</td></tr>
+          <tr><td>isotonic</td><td>0.01733</td></tr>
+        </table>
+        <p style="margin-top:8px">No calibrator beat the raw forest. Test ECE is 0.0099. Most scores sit near 0 or 0.9, so the reliability plot has few bins; the Brier comparison is the main evidence.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLUMN 3 -->
+  <div class="col">
+    <div class="card" style="--c:#14a88a">
+      <h2>Cut-off from a cost model</h2>
+      <div class="bd">
+        <div class="box">Missed pulsar (FN) = <b>10</b>. Wasted follow-up (FP) = <b>1</b>. Pick the threshold that minimises total cost on train+val.</div>
+        <img src="assets/cost_curve.png" alt="expected cost curve" style="max-height:230px;object-fit:contain">
+        <p class="small">Minimum at <b>T = 0.54</b>: 0 missed pulsars, 42 false alarms (selection set). Ratios 5:1, 10:1 and 20:1 all pick it.</p>
+      </div>
+    </div>
+
+    <div class="card" style="--c:#e8833a">
+      <h2>How many labels are needed?</h2>
+      <div class="bd">
+        <img src="assets/learning_curve.png" alt="learning curve" style="max-height:200px;object-fit:contain">
+        <p class="small">CV PR-AUC rises to ~0.92 by ~5,500 labels, then flattens. Only tested up to 7,159 labels (2/3 of train).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLUMN 4 -->
+  <div class="col">
+    <div class="card" style="--c:#14213d">
+      <h2>Results: untouched test set</h2>
+      <div class="bd">
+        <table>
+          <tr><th>Model</th><th>ROC-AUC</th><th>PR-AUC</th><th>Prec.</th><th>Recall</th></tr>
+          <tr><td>Logistic reg.</td><td>0.977</td><td>0.934</td><td>—</td><td>—</td></tr>
+          <tr><td><b>Random Forest</b></td><td><b>0.9777</b></td><td><b>0.9332</b></td><td><b>0.918</b></td><td><b>0.857</b></td></tr>
+          <tr class="target"><td>Target</td><td>≥ 0.97</td><td>—</td><td>≥ 0.90</td><td>≥ 0.90</td></tr>
+        </table>
+        <p class="small" style="margin-top:6px">RF at T = 0.54. 95% bootstrap CIs (B = 2000): ROC 0.967–0.987; recall 0.820–0.893. Brier 0.0166, ECE 0.0099.</p>
+        <p class="small"><b>Confusion (test):</b> 3,227 TN · 25 FP · 47 FN · 281 TP</p>
+      </div>
+    </div>
+
+    <div class="card" style="--c:#14a88a">
+      <h2>What did it learn?</h2>
+      <div class="bd">
+        <img src="assets/importance.png" alt="permutation importance" style="max-height:230px;object-fit:contain">
+        <p class="small"><b>Profile kurtosis</b> (how sharply the pulse peaks) matters 17× more than any other feature. Real pulsars fold to a sharp, repeating blink; interference folds flat. Dispersion statistics refine the decision but do not carry it.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<section class="bottom">
+  <div class="card" style="--c:#0f8a5f">
+    <h2>What we did</h2>
+    <div class="bd">
+      <ul class="did">
+        <li>Leakage-audited, stratified split before any weighting</li>
+        <li>Logistic regression baseline and CV-tuned Random Forest</li>
+        <li>Four-way calibration study, chosen by cross-validated Brier</li>
+        <li>Written 10:1 cost model; threshold 0.54, 5:1–20:1 agree</li>
+        <li>One final test evaluation with bootstrap CIs and ECE</li>
+        <li>Permutation importance, read against the physics</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="--c:#c0392b">
+    <h2>What we did not achieve</h2>
+    <div class="bd">
+      <ul class="didnt">
+        <li><b>Recall ≥ 0.90 at precision ≥ 0.90:</b> not met (recall 0.857)</li>
+        <li><b>Brier better after calibration:</b> not met; no calibrator won</li>
+        <li><b>Threshold gap:</b> textbook 0.09 vs measured 0.54, unexplained</li>
+        <li><b>Misses are confidently wrong:</b> 47 of 328 pulsars, median score ~0.1; threshold moves do not recover them</li>
+        <li><b>Scope:</b> 10:1 cost is a stated choice; one survey, eight summary numbers; no new pulsars found</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="--c:#14213d">
+    <h2>Data, credit &amp; reproduce</h2>
+    <div class="bd small">
+      <p><b>Data:</b> HTRU2, UCI ML Repository id 372 (Lyon, R., 2015, doi:10.24432/C5DK6R). Downloaded 2026-09-25.</p>
+      <p><b>Acknowledgement:</b> raw data by the HTRU collaboration with the Parkes Observatory (CSIRO); survey funded by UK EPSRC grant EP/I028099/1. Cite Lyon et al., MNRAS 459(1), 2016.</p>
+      <p><b>Code:</b> github.com/ps-aditya/pulsar-selection. <code>pip install -r requirements.txt</code>, then run <code>pulsar_selection.ipynb</code>.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

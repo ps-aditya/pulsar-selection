@@ -1,24 +1,27 @@
-# 3-minute video — shot-by-shot script (prototype v0.1)
+# 3-minute video — shot-by-shot script (v0.2, corrected)
 
-**Format:** screen recording. **Total:** 180 s, ~365 words (≈130 wpm — deliberate headroom for pauses).
-**Recording plan:** record over `docs/video_prototype.html` (the animatic auto-times every scene), or record the live notebook with this script as your teleprompter. Do 2–3 dry runs against the animatic before recording.
+**Format:** screen recording or slides. **Total:** 180 s, ~330 words (about 115 wpm, leaving room for pauses).
+**Recording plan:** record over `docs/poster.html` and the figures in `docs/assets/`, or the executed notebook with this script as the teleprompter. Do 2–3 dry runs and time each scene.
+
+Every scene answers one rubric item from the brief: data, split and leakage, baselines, calibration, cost, learning curve, interpretation, and honest misses.
 
 | # | Time | On screen | Narration (word-for-word) |
 |---|---|---|---|
-| 1 | 0:00–0:15 | Title card: *"Pulsar Candidate Selection — Project 7"* + the line "91% accuracy — free" | "Here is a dataset where doing almost nothing scores ninety-one percent — just predict 'not a pulsar' for every candidate. And a random forest reaches ninety-eight percent discrimination in minutes. So on this project, the score was never the point." |
-| 2 | 0:15–0:28 | `assets/balance.png` | "HTRU2: seventeen thousand eight hundred ninety-eight human-verified candidates from the High Time Resolution Universe survey. Nine point one six percent are genuine pulsars." |
-| 3 | 0:28–0:40 | `assets/corr8.png` | "Each candidate is eight numbers — four statistics of its folded pulse profile, four of its dispersion curve. The correlation matrix shows two clean physics blocks: profile shape, and dispersion sweep." |
-| 4 | 0:40–1:10 | Leakage-audit terminal output (§6b) | "Before any model, we made the numbers trustworthy. A code-printed leakage audit: zero duplicate rows overall and across every split pair; the three index sets pairwise disjoint; the scaler saw exactly the ten thousand seven hundred thirty-eight training rows; the calibration fold is disjoint from both. And the test set is evaluated exactly once — everything else is selected on train plus validation only." |
-| 5 | 1:10–1:45 | `assets/reliability.png` (calibration study panel) | "The brief expects calibration to improve the Brier score. We tested it properly: four strategies — no calibration, sigmoid, isotonic, and cross-fitted sigmoid — under repeated cross-validated Brier on train plus validation. The winner: no calibration. The class-weighted forest is already near-calibrated — expected calibration error under one percent — and isotonic would collapse the ranking. We report the tested answer, not the expected one." |
-| 6 | 1:45–2:15 | `assets/cost_curve.png` | "The operating threshold comes from a written cost model: a missed pulsar costs ten; a wasted follow-up costs one. The expected-cost curve bottoms at threshold zero point five four — zero missed pulsars at forty-two false alarms on the selection set — and all three cost ratios we tested, five-to-one, ten-to-one, twenty-to-one, pick the same threshold." |
-| 7 | 2:15–2:35 | `assets/importance.png` | "So what does the model listen to? Profile kurtosis — by a factor of seventeen over anything else. That's the lighthouse: a real pulsar folds to a sharp, peaked blink; interference folds flat. The dispersion statistics confirm the detection." |
-| 8 | 2:35–2:55 | Results card: ROC 0.9777 ✓ · misses ✗✗ | "Final test evaluation, one pass, with bootstrap confidence intervals: ROC-AUC zero point nine seven seven seven. And the honest misses first: the recall-at-precision target is not met at the cost-optimal point, and calibration did not improve the Brier — both documented with measured reasons." |
-| 9 | 2:55–3:00 | Close card: *"The score was free. We earned marks on everything the score hides."* | "The score was free. We earned marks on everything the score hides." |
+| 1 | 0:00–0:15 | Title: *Finding Pulsars in a Haystack of Noise* + "91% accuracy — found 0 pulsars" | "A model that says 'not a pulsar' for every candidate scores ninety-one percent accuracy and finds nothing. So on this project accuracy is the wrong score. The question is what the model rejects, and how sure it is." |
+| 2 | 0:15–0:28 | `docs/assets/balance.png` | "The data is HTRU2: seventeen thousand eight hundred ninety-eight radio candidates. Nine point one six percent are real pulsars. Each candidate is eight numbers: four describe its pulse profile, four describe its dispersion curve." |
+| 3 | 0:28–0:50 | Split bar (train / val / test) + leakage-audit output (§6b) | "We split first, stratified, before any reweighting, so near-copies cannot land on both sides. The audit prints zero duplicate rows and disjoint index sets. The test set is evaluated once, at the end." |
+| 4 | 0:50–1:20 | `docs/assets/reliability.png` (right panel: CV Brier bars) | "Calibration: we tested four ways to make probabilities honest. None beat the raw forest on cross-validated Brier, so we kept it. Test calibration error is zero point zero one. The brief's target, a better Brier after calibration, is not met, and we report that." |
+| 5 | 1:20–1:50 | `docs/assets/cost_curve.png` | "The threshold comes from a written cost model: a missed pulsar costs ten, a wasted follow-up costs one. The cost minimum on train plus validation is at zero point five four. The textbook rule would give zero point zero nine. We have not explained that gap, and we say so." |
+| 6 | 1:50–2:10 | `docs/assets/learning_curve.png` | "How many labels are needed? Cross-validated PR-AUC rises to about zero point nine two by around five and a half thousand labels, then flattens. That is within the range we tested, which stopped at two-thirds of the training set." |
+| 7 | 2:10–2:30 | `docs/assets/importance.png` | "What does the model listen to? Profile kurtosis, how sharply the pulse peaks, by a factor of seventeen over anything else. A real pulsar is a sharp repeating blink. Interference folds flat. The dispersion statistics refine the decision but do not carry it." |
+| 8 | 2:30–2:50 | Results card: ROC 0.9777 ✓ · recall-at-precision ✗ · Brier ✗ | "Final test, one pass, with bootstrap intervals. ROC-AUC zero point nine seven seven, which meets the target. Recall is zero point eight six at precision zero point nine two, which misses the target. And the Brier score did not improve after calibration." |
+| 9 | 2:50–3:00 | Close card: *The score was easy. The marks are in what it can't do.* | "The score was easy. The real work is calibration, the cost model, and the misses we cannot fix with a threshold." |
 
 ## Recording checklist
 
-- [ ] Dry-run against the animatic (`docs/video_prototype.html`) until each scene lands within ±3 s.
-- [ ] Numbers you must not fluff: **17,898 · 9.16% · 10,738 · T=0.54 · 42 · 0.633 · 0.9777 · ECE 0.0099**.
-- [ ] Never say "accuracy" except to call it worthless (scene 1).
-- [ ] If recording the notebook instead: pre-open the executed notebook at §6b, §8 figure, §9 figure — don't scroll-hunt on camera.
-- [ ] Audio: quiet room, phone mic at ~20 cm is fine; re-take any scene with a stumble rather than the whole take.
+- [ ] Dry-run the script until each scene lands within ±3 s of its timing.
+- [ ] Numbers to get exactly right: **17,898 · 9.16% · 10,738 · 0.54 · 0.09 · 0.9777 · 0.857 · 0.918 · 0.0099 · 47 · 0.633 · 17×**.
+- [ ] Say "accuracy" only to call it worthless (scene 1).
+- [ ] Say the threshold is the *empirical* cost minimum, not the posterior rule (scene 5).
+- [ ] Say that the Brier target and the recall-at-precision target are not met (scenes 4 and 8).
+- [ ] Audio: quiet room, phone mic about 20 cm away. Re-take a single scene after a stumble, not the whole take.

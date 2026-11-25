@@ -64,3 +64,29 @@ Every answer below is grounded in a specific repo artifact. Say the artifact, th
 - Dataset: Lyon, R. (2015), *HTRU2*, UCI ML Repository, DOI 10.24432/C5DK6R (CC-BY 4.0). Paper: Lyon et al., MNRAS 459(1), 2016.
 - Raw data: HTRU collaboration, Parkes Observatory (CSIRO/ATNF); survey funded by UK EPSRC EP/I028099/1. Release version + download date recorded in README.
 - Features: four folded-profile statistics + four DM–SNR statistics via PulsarFeatureLab; no sky position.
+
+## 10. "Didn't you look at the test set before the final run?"
+
+**Artifact:** `paper.md` §5 ("Protocol evolution").
+
+- Yes. An earlier dossier run computed test metrics (T = 0.10, test precision 0.867 / recall 0.896). Those numbers are kept for traceability.
+- The final protocol makes every decision (hyperparameters, calibration method, threshold) on train+val, then evaluates the test set once. The final model is not chosen from the earlier test numbers.
+
+## 11. "Why are there two thresholds, 0.5 and 0.54?"
+
+**Artifacts:** §9 of the main notebook; `pulsar_selection_v4_errors.ipynb` §1.
+
+- T = 0.54 is the cost-optimal threshold and is used for every headline number (precision, recall, confusion matrix).
+- The v4 error analysis uses 0.5 on purpose, as the common reference point for comparing RF and CNN decisions (v2/v4 protocol). Its counts (56 / 21 / 24) are not comparable to the T = 0.54 confusion matrix.
+
+## 12. "Why are the cost-ratio sensitivity results identical?"
+
+- At T = 0.54 the selection set has zero false negatives, so 5:1, 10:1 and 20:1 all select the same threshold. The table shows robustness across that bracket, not a wide sweep. Wider sweeps (for example 1:1, 2:1, 50:1) are the natural extension if asked: a lower miss cost should raise T, and a higher one should lower it.
+
+## 13. "The textbook rule says 0.09. Why did you pick 0.54?"
+
+**Artifacts:** §9 cost curve; `paper.md` §5.
+
+- Textbook rule: t* = C_FP / (C_FP + C_FN) = 1/11 ≈ 0.09, but only if the probabilities are calibrated to the true risk.
+- Our choice is the empirical minimum of the expected-cost curve on train+val: 0.54 (0 missed pulsars, 42 false alarms). We chose the measured minimum, not the formula.
+- We do not have a full explanation for the gap. Say so. Do not claim the threshold is the posterior cut.

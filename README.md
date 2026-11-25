@@ -82,6 +82,11 @@ Correctness partition of the test set: both-right 3,452; RF-only-right 56 (**all
 
 **Ablation (winning CNN, same protocol):** profile-only ROC 0.977 / PR 0.925; DM-only ROC 0.896 / PR 0.373; full-8 0.982 / 0.938. Profile carries the signal, DM refines it. (`cnn_ablation.py` → `cnn_ablation.json`)
 
+## Licence
+
+- Code (notebooks, `from_scratch/`, scripts, docs): MIT, see `LICENSE`.
+- Data (`data/HTRU_2.csv`): not ours. HTRU2 is CC-BY 4.0 (UCI ML Repository id 372). Keep the acknowledgement and citation above when reusing it.
+
 ## Citation
 
 - Dataset: Lyon, R. (2015). HTRU2 [Dataset]. UCI ML Repository. https://doi.org/10.24432/C5DK6R
